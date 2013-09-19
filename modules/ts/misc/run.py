@@ -551,6 +551,7 @@ class TestSuite(object):
                     features.append(m.group(1))
 
             #fin
+            print features
             return "%s__%s__%s__%s.xml" % (app, rev, tstamp, "_".join(features))
         else:
             if rev:
@@ -562,7 +563,10 @@ class TestSuite(object):
             else:
                 hw = ""
             tstamp = timestamp.strftime("%Y%m%d-%H%M%S")
-            return "%s_%s_%s_%s%s%s.xml" % (app, self.targetos, self.targetarch, hw, rev, tstamp)
+            lname = "%s_%s_%s_%s%s%s.xml" % (app, self.targetos, self.targetarch, hw, rev, tstamp)
+            lname = str.replace(lname, '(', '_')
+            lname = str.replace(lname, ')', '_')
+            return lname
 
     def getTest(self, name):
         # full path
