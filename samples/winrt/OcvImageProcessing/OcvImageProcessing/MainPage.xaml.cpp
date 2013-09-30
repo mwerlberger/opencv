@@ -8,6 +8,7 @@
 #include <ppltasks.h>
 #include <wrl\client.h>
 #include <Robuffer.h>
+#include <vector>
 using namespace OcvImageProcessing;
 
 using namespace Microsoft::WRL;
@@ -26,9 +27,6 @@ using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
 
-#include <opencv2\core\core.hpp>
-#include <opencv2\imgproc\imgproc.hpp>
-
 Uri^ InputImageUri = ref new Uri(L"ms-appx:///Assets/Lena.png");
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
@@ -36,21 +34,7 @@ Uri^ InputImageUri = ref new Uri(L"ms-appx:///Assets/Lena.png");
 MainPage::MainPage()
 {
 	InitializeComponent();
-}
-
-/// <summary>
-/// Invoked when this page is about to be displayed in a Frame.
-/// </summary>
-/// <param name="e">Event data that describes how this page was reached.  The Parameter
-/// property is typically used to configure the page.</param>
-void MainPage::OnNavigatedTo(NavigationEventArgs^ e)
-{
-	(void) e;	// Unused parameter
-}
-
-
-void OcvImageProcessing::MainPage::Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
-{
+	
 	RandomAccessStreamReference^ streamRef = RandomAccessStreamReference::CreateFromUri(InputImageUri);
 
     task<IRandomAccessStreamWithContentType^> (streamRef->OpenReadAsync()).
@@ -79,30 +63,119 @@ void OcvImageProcessing::MainPage::Button_Click(Platform::Object^ sender, Window
         PixelDataProvider^ pixelProvider = thisTask.get();
 		Platform::Array<byte>^ srcPixels = pixelProvider->DetachPixelData();
 		
-		cv::Mat inputImage(frameHeight, frameWidth, CV_8UC4, srcPixels->Data);
-		unsigned char* dstPixels;
-		
-        // Create the WriteableBitmap 
-        WriteableBitmap^ bitmap = ref new WriteableBitmap(frameWidth, frameHeight);
+		Lena = cv::Mat(frameHeight, frameWidth, CV_8UC4);
+		memcpy(Lena.data, srcPixels->Data, 4*frameWidth*frameHeight);
+		UpdateImage(Lena);
+	});
+}
 
-		// Get access to the pixels
-		IBuffer^ buffer = bitmap->PixelBuffer;
+/// <summary>
+/// Invoked when this page is about to be displayed in a Frame.
+/// </summary>
+/// <param name="e">Event data that describes how this page was reached.  The Parameter
+/// property is typically used to configure the page.</param>
+void MainPage::OnNavigatedTo(NavigationEventArgs^ e)
+{
+	(void) e;	// Unused parameter
+}
 
-		// Obtain IBufferByteAccess
-		ComPtr<IBufferByteAccess> pBufferByteAccess;
-		ComPtr<IUnknown> pBuffer((IUnknown*)buffer);
-		pBuffer.As(&pBufferByteAccess);
+void OcvImageProcessing::MainPage::UpdateImage(const cv::Mat& image)
+{
+    // Create the WriteableBitmap 
+	WriteableBitmap^ bitmap = ref new WriteableBitmap(image.cols, image.rows);
 
-		// Get pointer to pixel bytes
-		pBufferByteAccess->Buffer(&dstPixels);
-		cv::Mat outputImage(frameHeight, frameWidth, CV_8UC4, dstPixels);
+	// Get access to the pixels
+	IBuffer^ buffer = bitmap->PixelBuffer;
+	unsigned char* dstPixels;
 
-		cv::Mat intermediateMat;
-		cv::Canny(inputImage, intermediateMat, 80, 90);
-		cv::cvtColor(intermediateMat, outputImage, CV_GRAY2BGRA);
-		//cv::blur(inputImage, outputImage, cv::Size(3,3));
+	// Obtain IBufferByteAccess
+	ComPtr<IBufferByteAccess> pBufferByteAccess;
+	ComPtr<IUnknown> pBuffer((IUnknown*)buffer);
+	pBuffer.As(&pBufferByteAccess);
 
-        // Set the bitmap to the Image element
-		PreviewWidget->Source = bitmap;       
-    });
+	// Get pointer to pixel bytes
+	pBufferByteAccess->Buffer(&dstPixels);
+	memcpy(dstPixels, image.data, 4*image.cols*image.rows);
+
+	// Set the bitmap to the Image element
+	PreviewWidget->Source = bitmap;      
+}
+
+cv::Mat OcvImageProcessing::MainPage::ApplyGrayFilter(const cv::Mat& image)
+{
+	cv::Mat result;
+	cv::Mat intermediateMat;
+	cv::cvtColor(image, intermediateMat, CV_RGBA2GRAY);
+	cv::cvtColor(intermediateMat, result, CV_GRAY2BGRA);
+	return result;
+}
+
+cv::Mat OcvImageProcessing::MainPage::ApplyCannyFilter(const cv::Mat& image)
+{
+	cv::Mat result;
+	cv::Mat intermediateMat;
+	cv::Canny(image, intermediateMat, 80, 90);
+	cv::cvtColor(intermediateMat, result, CV_GRAY2BGRA);
+	return result;
+}
+
+cv::Mat OcvImageProcessing::MainPage::ApplyBlurFilter(const cv::Mat& image)
+{
+	cv::Mat result;
+	cv::blur(image, result, cv::Size(3,3));
+	return result;
+}
+
+cv::Mat OcvImageProcessing::MainPage::ApplyFindFeaturesFilter(const cv::Mat& image)
+{
+	cv::Mat result;
+	cv::Mat intermediateMat;
+	cv::FastFeatureDetector detector(50);
+	std::vector<cv::KeyPoint> features;
+
+	image.copyTo(result);
+	cv::cvtColor(image, intermediateMat, CV_RGBA2GRAY);
+	detector.detect(intermediateMat, features);
+
+	for( unsigned int i = 0; i < std::min(features.size(), (size_t)50); i++ )
+    {
+        const cv::KeyPoint& kp = features[i];
+		cv::circle(result, cv::Point(kp.pt.x, kp.pt.y), 10, cv::Scalar(255,0,0,255));
+    }
+	
+	return result;
+}
+
+cv::Mat OcvImageProcessing::MainPage::ApplySepiaFilter(const cv::Mat& image)
+{
+	cv::Mat result;
+
+	return result;
+}
+
+void OcvImageProcessing::MainPage::Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	switch(FilterTypeWidget->SelectedIndex)
+	{
+	case PREVIEW:
+		UpdateImage(Lena);
+		break;
+	case GRAY:
+		UpdateImage(ApplyGrayFilter(Lena));
+		break;
+	case CANNY:
+		UpdateImage(ApplyCannyFilter(Lena));
+		break;
+	case BLUR:
+		UpdateImage(ApplyBlurFilter(Lena));
+		break;
+	case FEATURES:
+		UpdateImage(ApplyFindFeaturesFilter(Lena));
+		break;
+	case SEPIA:
+		UpdateImage(ApplySepiaFilter(Lena));
+		break;
+	default:
+		UpdateImage(Lena);
+	}
 }

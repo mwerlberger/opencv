@@ -41,8 +41,22 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="OcvImageProcessing_TemporaryKey.pfx" />
-    <None Include="..\..\opencv\build\install\bin\opencv_core246.dll" />
-    <None Include="..\..\opencv\build\install\bin\opencv_imgproc246.dll" />
+    <None Include="..\..\..\..\build\install\bin\opencv_core246.dll" />
+    <None Include="..\..\..\..\build\install\bin\opencv_imgproc246.dll" />
+    <None Include="..\..\..\..\build\install\bin\opencv_features2d246.dll" />
+    <None Include="..\..\..\..\build\install\bin\opencv_nonfree246.dll" />
+    <None Include="..\..\..\..\build\install\bin\opencv_calib3d246.dll" />
+    <None Include="..\..\..\..\build\install\bin\opencv_contrib246.dll" />
+    <None Include="..\..\..\..\build\install\bin\opencv_flann246.dll" />
+    <None Include="..\..\..\..\build\install\bin\opencv_highgui246.dll" />
+    <None Include="..\..\..\..\build\install\bin\opencv_legacy246.dll" />
+    <None Include="..\..\..\..\build\install\bin\opencv_ml246.dll" />
+    <None Include="..\..\..\..\build\install\bin\opencv_objdetect246.dll" />
+    <None Include="..\..\..\..\build\install\bin\opencv_photo246.dll" />
+    <None Include="..\..\..\..\build\install\bin\opencv_stitching246.dll" />
+    <None Include="..\..\..\..\build\install\bin\opencv_superres246.dll" />
+    <None Include="..\..\..\..\build\install\bin\opencv_video246.dll" />
+    <None Include="..\..\..\..\build\install\bin\opencv_videostab246.dll" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainPage.xaml" />
