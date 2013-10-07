@@ -183,7 +183,7 @@ static void GPUErode(const oclMat &src, oclMat &dst, oclMat &mat_kernel,
     int srcOffset_y = srcOffset / srcStep;
     Context *clCxt = src.clCxt;
     string kernelName;
-    size_t localThreads[3] = {16, 16, 1};
+    size_t localThreads[3] = {16, 10, 1};
     size_t globalThreads[3] = {(src.cols + localThreads[0] - 1) / localThreads[0] *localThreads[0], (src.rows + localThreads[1] - 1) / localThreads[1] *localThreads[1], 1};
 
     if (src.type() == CV_8UC1)
@@ -263,7 +263,7 @@ static void GPUDilate(const oclMat &src, oclMat &dst, oclMat &mat_kernel,
     int srcOffset_y = srcOffset / srcStep;
     Context *clCxt = src.clCxt;
     string kernelName;
-    size_t localThreads[3] = {16, 16, 1};
+    size_t localThreads[3] = {16, 10, 1};
     size_t globalThreads[3] = {(src.cols + localThreads[0] - 1) / localThreads[0] *localThreads[0],
                                (src.rows + localThreads[1] - 1) / localThreads[1] *localThreads[1], 1};
 
@@ -544,6 +544,8 @@ static int _prepareKernelFilter2D(std::vector<T>& data, const Mat &kernel)
 static void GPUFilter2D(const oclMat &src, oclMat &dst, const Mat &kernel,
     const Size &ksize, const Point& anchor, const int borderType)
 {
+    printf("Into GPUFilter2D() call\n");
+
     CV_Assert(src.clCxt == dst.clCxt);
     CV_Assert((src.cols == dst.cols) &&
               (src.rows == dst.rows));
@@ -790,6 +792,219 @@ static void GPUFilterBox(const oclMat &src, oclMat &dst,
               (src.rows == dst.rows));
     CV_Assert(src.oclchannels() == dst.oclchannels());
 
+    Context *clCxt = src.clCxt;
+
+    string kernelName = "boxFilter_C1_D0";
+
+    char btype[30];
+
+    switch (borderType)
+    {
+    case 0:
+        sprintf(btype, "BORDER_CONSTANT");
+        break;
+    case 1:
+        sprintf(btype, "BORDER_REPLICATE");
+        break;
+    case 2:
+        sprintf(btype, "BORDER_REFLECT");
+        break;
+    case 3:
+        CV_Error(CV_StsUnsupportedFormat, "BORDER_WRAP is not supported!");
+        return;
+    case 4:
+        sprintf(btype, "BORDER_REFLECT_101");
+        break;
+    }
+
+    char build_options[150];
+    sprintf(build_options, "-D anX=%d -D anY=%d -D ksX=%d -D ksY=%d -D %s", anchor.x, anchor.y, ksize.width, ksize.height, btype);
+
+    size_t blockSizeX = 128, blockSizeY = 1;
+    size_t gSize = blockSizeX - (ksize.width - 1);
+    size_t threads = (dst.offset % dst.step % 4 + dst.cols + 3) / 4;
+    size_t globalSizeX = threads % gSize == 0 ? threads / gSize * blockSizeX : (threads / gSize + 1) * blockSizeX;
+    size_t globalSizeY = ((dst.rows + 1) / 2) % blockSizeY == 0 ? ((dst.rows + 1) / 2) : (((dst.rows + 1) / 2) / blockSizeY + 1) * blockSizeY;
+
+    size_t globalThreads[3] = { globalSizeX, globalSizeY, 1 };
+    size_t localThreads[3]  = { blockSizeX, blockSizeY, 1 };
+
+    vector<pair<size_t , const void *> > args;
+    args.push_back(make_pair(sizeof(cl_mem), &src.data));
+    args.push_back(make_pair(sizeof(cl_mem), &dst.data));
+    args.push_back(make_pair(sizeof(cl_float), (void *)&alpha));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&src.offset));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&src.wholerows));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&src.wholecols));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&src.step));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&dst.offset));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&dst.rows));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&dst.cols));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&dst.step));
+
+    openCLExecuteKernel(clCxt, &filtering_boxFilter, kernelName, globalThreads, localThreads, args, -1, -1, build_options);
+}
+
+static void GPUFilterBox_8u_C4R(const oclMat &src, oclMat &dst,
+                         Size &ksize, const Point anchor, const int borderType)
+{
+    //Normalize the result by default
+    float alpha = ksize.height * ksize.width;
+
+    CV_Assert(src.clCxt == dst.clCxt);
+    CV_Assert((src.cols == dst.cols) &&
+              (src.rows == dst.rows));
+    Context *clCxt = src.clCxt;
+
+    string kernelName = "boxFilter_C4_D0";
+
+    char btype[30];
+
+    switch (borderType)
+    {
+    case 0:
+        sprintf(btype, "BORDER_CONSTANT");
+        break;
+    case 1:
+        sprintf(btype, "BORDER_REPLICATE");
+        break;
+    case 2:
+        sprintf(btype, "BORDER_REFLECT");
+        break;
+    case 3:
+        CV_Error(CV_StsUnsupportedFormat, "BORDER_WRAP is not supported!");
+        return;
+    case 4:
+        sprintf(btype, "BORDER_REFLECT_101");
+        break;
+    }
+
+    char build_options[150];
+    sprintf(build_options, "-D anX=%d -D anY=%d -D ksX=%d -D ksY=%d -D %s", anchor.x, anchor.y, ksize.width, ksize.height, btype);
+
+    size_t blockSizeX = 160, blockSizeY = 1;
+    size_t gSize = blockSizeX - ksize.width / 2 * 2;
+    size_t globalSizeX = (src.cols) % gSize == 0 ? src.cols / gSize * blockSizeX : (src.cols / gSize + 1) * blockSizeX;
+    size_t rows_per_thread = 2;
+    size_t globalSizeY = ((src.rows + rows_per_thread - 1) / rows_per_thread) % blockSizeY == 0 ? ((src.rows + rows_per_thread - 1) / rows_per_thread) : (((src.rows + rows_per_thread - 1) / rows_per_thread) / blockSizeY + 1) * blockSizeY;
+
+    size_t globalThreads[3] = { globalSizeX, globalSizeY, 1};
+    size_t localThreads[3]  = { blockSizeX, blockSizeY, 1};
+
+    vector<pair<size_t , const void *> > args;
+    args.push_back(make_pair(sizeof(cl_mem), &src.data));
+    args.push_back(make_pair(sizeof(cl_mem), &dst.data));
+    args.push_back(make_pair(sizeof(cl_float), (void *)&alpha));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&src.offset));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&src.wholerows));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&src.wholecols));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&src.step));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&dst.offset));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&dst.rows));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&dst.cols));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&dst.step));
+
+    openCLExecuteKernel(clCxt, &filtering_boxFilter, kernelName, globalThreads, localThreads, args, -1, -1, build_options);
+}
+
+static void GPUFilterBox_32F_C1R(const oclMat &src, oclMat &dst,
+                          Size &ksize, const Point anchor, const int borderType)
+{
+    //Normalize the result by default
+    float alpha = ksize.height * ksize.width;
+
+    CV_Assert(src.clCxt == dst.clCxt);
+    CV_Assert((src.cols == dst.cols) &&
+              (src.rows == dst.rows));
+    Context *clCxt = src.clCxt;
+
+    string kernelName = "boxFilter_C1_D5";
+
+    char btype[30];
+
+    switch (borderType)
+    {
+    case 0:
+        sprintf(btype, "BORDER_CONSTANT");
+        break;
+    case 1:
+        sprintf(btype, "BORDER_REPLICATE");
+        break;
+    case 2:
+        sprintf(btype, "BORDER_REFLECT");
+        break;
+    case 3:
+        CV_Error(CV_StsUnsupportedFormat, "BORDER_WRAP is not supported!");
+        return;
+    case 4:
+        sprintf(btype, "BORDER_REFLECT_101");
+        break;
+    }
+
+    char build_options[150];
+    sprintf(build_options, "-D anX=%d -D anY=%d -D ksX=%d -D ksY=%d -D %s", anchor.x, anchor.y, ksize.width, ksize.height, btype);
+
+    size_t blockSizeX = 128, blockSizeY = 1;
+    size_t gSize = blockSizeX - ksize.width / 2 * 2;
+    size_t globalSizeX = (src.cols) % gSize == 0 ? src.cols / gSize * blockSizeX : (src.cols / gSize + 1) * blockSizeX;
+    size_t rows_per_thread = 2;
+    size_t globalSizeY = ((src.rows + rows_per_thread - 1) / rows_per_thread) % blockSizeY == 0 ? ((src.rows + rows_per_thread - 1) / rows_per_thread) : (((src.rows + rows_per_thread - 1) / rows_per_thread) / blockSizeY + 1) * blockSizeY;
+
+
+    size_t globalThreads[3] = { globalSizeX, globalSizeY, 1};
+    size_t localThreads[3]  = { blockSizeX, blockSizeY, 1};
+
+    vector<pair<size_t , const void *> > args;
+    args.push_back(make_pair(sizeof(cl_mem), &src.data));
+    args.push_back(make_pair(sizeof(cl_mem), &dst.data));
+    args.push_back(make_pair(sizeof(cl_float), (void *)&alpha));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&src.offset));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&src.wholerows));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&src.wholecols));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&src.step));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&dst.offset));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&dst.rows));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&dst.cols));
+    args.push_back(make_pair(sizeof(cl_int), (void *)&dst.step));
+
+    openCLExecuteKernel(clCxt, &filtering_boxFilter, kernelName, globalThreads, localThreads, args, -1, -1, build_options);
+}
+
+static void GPUFilterBox_32F_C4R(const oclMat &src, oclMat &dst,
+                          Size &ksize, const Point anchor, const int borderType)
+{
+    //Normalize the result by default
+    float alpha = ksize.height * ksize.width;
+
+    CV_Assert(src.clCxt == dst.clCxt);
+    CV_Assert((src.cols == dst.cols) &&
+              (src.rows == dst.rows));
+    Context *clCxt = src.clCxt;
+
+    string kernelName = "boxFilter_C4_D5";
+
+    char btype[30];
+
+    switch (borderType)
+    {
+    case 0:
+        sprintf(btype, "BORDER_CONSTANT");
+        break;
+    case 1:
+        sprintf(btype, "BORDER_REPLICATE");
+        break;
+    case 2:
+        sprintf(btype, "BORDER_REFLECT");
+        break;
+    case 3:
+        CV_Error(CV_StsUnsupportedFormat, "BORDER_WRAP is not supported!");
+        return;
+    case 4:
+        sprintf(btype, "BORDER_REFLECT_101");
+        break;
+    }
+>>>>>>> Some of function was enabled on Qualcomm S800 by changing grid size.
+
     size_t tryWorkItems = src.clCxt->getDeviceInfo().maxWorkItemSizes[0];
     do {
         size_t BLOCK_SIZE = tryWorkItems;
@@ -998,9 +1213,9 @@ void linearRowFilter_gpu(const oclMat &src, const oclMat &dst, oclMat mat_kernel
     CV_Assert(ksize == (anchor << 1) + 1);
     int channels = src.oclchannels();
 
-    size_t localThreads[3] = { 16, 16, 1 };
+    size_t localThreads[3] = {16, 10, 1};
     size_t globalThreads[3] = { dst.cols, dst.rows, 1 };
-
+    
     const char * const borderMap[] = { "BORDER_CONSTANT", "BORDER_REPLICATE", "BORDER_REFLECT", "BORDER_WRAP", "BORDER_REFLECT_101" };
     std::string buildOptions = format("-D RADIUSX=%d -D LSIZE0=%d -D LSIZE1=%d -D CN=%d -D %s",
             anchor, (int)localThreads[0], (int)localThreads[1], channels, borderMap[bordertype]);
@@ -1095,7 +1310,7 @@ void linearColumnFilter_gpu(const oclMat &src, const oclMat &dst, oclMat mat_ker
     Context *clCxt = src.clCxt;
     int channels = src.oclchannels();
 
-    size_t localThreads[3] = {16, 16, 1};
+    size_t localThreads[3] = {16, 10, 1};
     string kernelName = "col_filter";
 
     char btype[30];

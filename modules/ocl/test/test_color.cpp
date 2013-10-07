@@ -126,7 +126,6 @@ OCL_TEST_P(CvtColor, GRAY2RGB)
 {
     doTest(1, 3, CVTCODE(GRAY2RGB));
 };
-
 OCL_TEST_P(CvtColor, BGR2GRAY)
 {
     doTest(3, 1, CVTCODE(BGR2GRAY));
@@ -135,7 +134,6 @@ OCL_TEST_P(CvtColor, GRAY2BGR)
 {
     doTest(1, 3, CVTCODE(GRAY2BGR));
 };
-
 OCL_TEST_P(CvtColor, RGBA2GRAY)
 {
     doTest(3, 1, CVTCODE(RGBA2GRAY));
@@ -144,7 +142,6 @@ OCL_TEST_P(CvtColor, GRAY2RGBA)
 {
     doTest(1, 3, CVTCODE(GRAY2RGBA));
 };
-
 OCL_TEST_P(CvtColor, BGRA2GRAY)
 {
     doTest(3, 1, CVTCODE(BGRA2GRAY));
@@ -153,7 +150,6 @@ OCL_TEST_P(CvtColor, GRAY2BGRA)
 {
     doTest(1, 3, CVTCODE(GRAY2BGRA));
 };
-
 OCL_TEST_P(CvtColor, RGB2YUV)
 {
     doTest(3, 3, CVTCODE(RGB2YUV));

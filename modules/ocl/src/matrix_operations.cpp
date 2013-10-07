@@ -85,8 +85,10 @@ static void convert_C3C4(const cl_mem &src, oclMat &dst)
     args.push_back( make_pair( sizeof(cl_int), (void *)&pixel_end));
 
     size_t globalThreads[3] = { divUp(dst.wholecols * dst.wholerows, 4), 1, 1 };
-    size_t localThreads[3] = { 256, 1, 1 };
+    size_t localThreads[3] = {128, 1, 1};
 
+    printf("convert_C3C4 with lt %d %d %d\n", localThreads[0], localThreads[1], localThreads[2]);
+    printf("convert_C3C4 with gt %d %d %d\n", globalThreads[0], globalThreads[1], globalThreads[2]);
     openCLExecuteKernel(clCxt, &convertC3C4, "convertC3C4", globalThreads, localThreads,
                         args, -1, -1, buildOptions.c_str());
 }
@@ -112,8 +114,10 @@ static void convert_C4C3(const oclMat &src, cl_mem &dst)
     args.push_back( make_pair( sizeof(cl_int), (void *)&pixel_end));
 
     size_t globalThreads[3] = { divUp(src.wholecols * src.wholerows, 4), 1, 1};
-    size_t localThreads[3] = { 256, 1, 1 };
+    size_t localThreads[3] = {128, 1, 1};
 
+    printf("convert_C4C3 with lt %d %d %d\n", localThreads[0], localThreads[1], localThreads[2]);
+    printf("convert_C4C3 with gt %d %d %d\n", globalThreads[0], globalThreads[1], globalThreads[2]);
     openCLExecuteKernel(clCxt, &convertC3C4, "convertC4C3", globalThreads, localThreads, args, -1, -1, buildOptions.c_str());
 }
 
@@ -287,7 +291,7 @@ static void convert_run(const oclMat &src, oclMat &dst, double alpha, double bet
     CV_DbgAssert(src.rows == dst.rows && src.cols == dst.cols);
     vector<pair<size_t , const void *> > args;
 
-    size_t localThreads[3] = { 16, 16, 1 };
+    size_t localThreads[3] = { 16, 10, 1 };
     size_t globalThreads[3] = { divUp(cols1, localThreads[0]) * localThreads[0],
                                 divUp(dst.rows, localThreads[1]) * localThreads[1], 1 };
 

@@ -81,7 +81,7 @@ void RGB2Gray_caller(const oclMat &src, oclMat &dst, int bidx)
     args.push_back( make_pair( sizeof(cl_int) , (void *)&src_offset ));
     args.push_back( make_pair( sizeof(cl_int) , (void *)&dst_offset ));
 
-    size_t gt[3] = {src.cols, src.rows, 1}, lt[3] = {16, 16, 1};
+    size_t gt[3] = {src.cols, src.rows, 1}, lt[3] = {16, 10, 1};
     openCLExecuteKernel(src.clCxt, &cvt_color, "RGB2Gray", gt, lt, args, -1, -1, build_options.c_str());
 }
 
@@ -101,7 +101,7 @@ void Gray2RGB_caller(const oclMat &src, oclMat &dst)
     args.push_back( make_pair( sizeof(cl_int) , (void *)&src_offset ));
     args.push_back( make_pair( sizeof(cl_int) , (void *)&dst_offset ));
 
-    size_t gt[3] = {src.cols, src.rows, 1}, lt[3] = {16, 16, 1};
+    size_t gt[3] = {src.cols, src.rows, 1}, lt[3] = {16, 10, 1};
     openCLExecuteKernel(src.clCxt, &cvt_color, "Gray2RGB", gt, lt, args, -1, -1, build_options.c_str());
 }
 
@@ -124,7 +124,7 @@ void RGB2YUV_caller(const oclMat &src, oclMat &dst, int bidx)
     args.push_back( make_pair( sizeof(cl_int) , (void *)&src_offset ));
     args.push_back( make_pair( sizeof(cl_int) , (void *)&dst_offset ));
 
-    size_t gt[3] = {src.cols, src.rows, 1}, lt[3] = {16, 16, 1};
+    size_t gt[3] = {src.cols, src.rows, 1}, lt[3] = {16, 10, 1};
     openCLExecuteKernel(src.clCxt, &cvt_color, "RGB2YUV", gt, lt, args, -1, -1, build_options.c_str());
 }
 
@@ -148,7 +148,7 @@ void YUV2RGB_caller(const oclMat &src, oclMat &dst, int bidx)
     args.push_back( make_pair( sizeof(cl_int) , (void *)&src_offset ));
     args.push_back( make_pair( sizeof(cl_int) , (void *)&dst_offset ));
 
-    size_t gt[3] = {src.cols, src.rows, 1}, lt[3] = {16, 16, 1};
+    size_t gt[3] = {src.cols, src.rows, 1}, lt[3] = {16, 10, 1};
     openCLExecuteKernel(src.clCxt, &cvt_color, "YUV2RGB", gt, lt, args, -1, -1, buildOptions.c_str());
 }
 
@@ -171,7 +171,7 @@ void YUV2RGB_NV12_caller(const oclMat &src, oclMat &dst, int bidx)
     args.push_back( make_pair( sizeof(cl_int) , (void *)&src_offset ));
     args.push_back( make_pair( sizeof(cl_int) , (void *)&dst_offset ));
 
-    size_t gt[3] = {dst.cols / 2, dst.rows / 2, 1}, lt[3] = {16, 16, 1};
+    size_t gt[3] = {dst.cols / 2, dst.rows / 2, 1}, lt[3] = {16, 10, 1};
     openCLExecuteKernel(src.clCxt, &cvt_color, "YUV2RGBA_NV12", gt, lt, args, -1, -1, build_options.c_str());
 }
 
@@ -194,7 +194,7 @@ void RGB2YCrCb_caller(const oclMat &src, oclMat &dst, int bidx)
     args.push_back( make_pair( sizeof(cl_int) , (void *)&src_offset ));
     args.push_back( make_pair( sizeof(cl_int) , (void *)&dst_offset ));
 
-    size_t gt[3] = {src.cols, src.rows, 1}, lt[3] = {16, 16, 1};
+    size_t gt[3] = {src.cols, src.rows, 1}, lt[3] = {16, 10, 1};
     openCLExecuteKernel(src.clCxt, &cvt_color, "RGB2YCrCb", gt, lt, args, -1, -1, build_options.c_str());
 }
 
@@ -223,6 +223,7 @@ void cvtColor_caller(const oclMat &src, oclMat &dst, int code, int dcn)
         CV_Assert(scn == 3 || scn == 4);
         bidx = code == CV_BGR2GRAY || code == CV_BGRA2GRAY ? 0 : 2;
         dst.create(sz, CV_MAKETYPE(depth, 1));
+        printf("Calling RGB2Gray_caller()\n");
         RGB2Gray_caller(src, dst, bidx);
         break;
     }
@@ -301,5 +302,6 @@ void cvtColor_caller(const oclMat &src, oclMat &dst, int code, int dcn)
 
 void cv::ocl::cvtColor(const oclMat &src, oclMat &dst, int code, int dcn)
 {
+    printf("Calling cvtColor_caller()\n");
     cvtColor_caller(src, dst, code, dcn);
 }

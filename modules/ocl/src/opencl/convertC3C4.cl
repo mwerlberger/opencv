@@ -94,7 +94,7 @@ __kernel void convertC3C4(__global const GENTYPE4 * restrict src, __global GENTY
 }
 
 __kernel void convertC4C3(__global const GENTYPE4 * restrict src, __global GENTYPE4 *dst, int cols, int rows,
-                    int srcStep_in_pixel,int pixel_end)
+                    int srcStep_in_pixel, int pixel_end)
 {
     int id = get_global_id(0)<<2;
     int y = id / cols;

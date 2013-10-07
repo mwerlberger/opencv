@@ -114,7 +114,7 @@ void  cvPreparePredictData( const CvArr* _sample, int dims_all,
     float* row_sample = 0;
     int* inverse_comp_idx = 0;
 
-    CV_FUNCNAME( "cvPreparePredictData" );
+    CV_FUNCNAME( "cvPreparePredictDataOcl" );
 
     __BEGIN__;
 
@@ -633,7 +633,7 @@ float CvSVM_OCL::predict(const CvMat* samples, CV_OUT CvMat* results) const
         class_count = class_labels ? class_labels->cols :
                       params.svm_type == ONE_CLASS ? 1 : 0;
 
-        CV_CALL( cvPreparePredictData(&sample, var_all, var_idx,
+        CV_CALL( cvPreparePredictDataOcl(&sample, var_all, var_idx,
                                       class_count, 0, &row_sample ));
         for(int j = 0; j < var_count; ++j)
             src_temp.at<float>(i, j) = row_sample[j];

@@ -59,7 +59,7 @@ enum SortMethod
     SELECTION
 };
 
-const int GROUP_SIZE = 256;
+const int GROUP_SIZE = 128;
 
 template<SortMethod method>
 struct Sorter
@@ -189,7 +189,7 @@ int findCorners_caller(
     args.push_back(make_pair( sizeof(cl_mem), (void*)&g_counter.data ));
 
     size_t globalThreads[3] = {eig.cols, eig.rows, 1};
-    size_t localThreads[3]  = {16, 16, 1};
+    size_t localThreads[3]  = {16, 10, 1};
 
     const char * opt = mask.empty() ? "" : "-D WITH_MASK";
     openCLExecuteKernel(cxt, &imgproc_gftt, kernelname, globalThreads, localThreads, args, -1, -1, opt);

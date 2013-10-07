@@ -296,7 +296,7 @@ namespace cv
                 kernelName = "resizeNN";
 
             //TODO: improve this kernel
-            size_t blkSizeX = 16, blkSizeY = 16;
+            size_t blkSizeX = 16, blkSizeY = 10;
             size_t glbSizeX;
             if (src.type() == CV_8UC1)
             {
@@ -410,7 +410,7 @@ namespace cv
             args.push_back( make_pair( sizeof(cl_int), (void *)&dstStep));
 
             size_t globalThreads[3] = {(src.cols + 18) / 16 * 16, (src.rows + 15) / 16 * 16, 1};
-            size_t localThreads[3] = {16, 16, 1};
+            size_t localThreads[3] = {16, 10, 1};
 
             if (m == 3)
             {
@@ -609,7 +609,7 @@ namespace cv
 
                 }
                 //TODO: improve this kernel
-                size_t blkSizeX = 16, blkSizeY = 16;
+                size_t blkSizeX = 16, blkSizeY = 10;
                 size_t glbSizeX;
                 size_t cols;
 
@@ -681,7 +681,7 @@ namespace cv
                 }
 
                 //TODO: improve this kernel
-                size_t blkSizeX = 16, blkSizeY = 16;
+                size_t blkSizeX = 16, blkSizeY = 8;
                 size_t glbSizeX;
                 size_t cols;
                 if (src.type() == CV_8UC1 && interpolation == 0)
@@ -1261,7 +1261,7 @@ namespace cv
             {
                 src_offset = mat_src.offset;
                 localThreads[0] = 1;
-                localThreads[1] = 256;
+                localThreads[1] = 160;
                 globalThreads[0] = left_col + right_col;
                 globalThreads[1] = mat_src.rows;
 
@@ -1578,7 +1578,7 @@ namespace cv
             oclMat oclspace_ofs(1, d * d, CV_32SC1, space_ofs);
 
             string kernelName = "bilateral";
-            size_t localThreads[3]  = { 16, 16, 1 };
+            size_t localThreads[3]  = { 16, 10, 1 };
             size_t globalThreads[3] = { dst.cols, dst.rows, 1 };
 
             if ((dst.type() == CV_8UC1) && ((dst.offset & 3) == 0) && ((dst.cols & 3) == 0))

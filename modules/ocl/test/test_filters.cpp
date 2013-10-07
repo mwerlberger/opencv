@@ -341,13 +341,22 @@ OCL_TEST_P(AdaptiveBilateral, Mat)
         adaptiveBilateralFilter(src_roi, dst_roi, kernelSize, 5, Point(-1, -1), borderType); // TODO anchor
         ocl::adaptiveBilateralFilter(gsrc_roi, gdst_roi, kernelSize, 5, Point(-1, -1), borderType);
 
+<<<<<<< HEAD
         Near();
     }
 }
+=======
+INSTANTIATE_TEST_CASE_P(Filter, Blur, Combine(
+                        Values(CV_8UC1, CV_8UC3, CV_8UC4 /*, CV_32FC1, CV_32FC4*/),
+                        Values(cv::Size(3, 3), cv::Size(5, 5), cv::Size(7, 7)),
+                        Values(Size(0, 0)), //not use
+                        Values((MatType)cv::BORDER_CONSTANT, (MatType)cv::BORDER_REPLICATE, (MatType)cv::BORDER_REFLECT, (MatType)cv::BORDER_REFLECT_101)));
+>>>>>>> Some of function was enabled on Qualcomm S800 by changing grid size.
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 // MedianFilter
 
+<<<<<<< HEAD
 typedef FilterTestBase MedianFilter;
 
 OCL_TEST_P(MedianFilter, Mat)
@@ -355,16 +364,38 @@ OCL_TEST_P(MedianFilter, Mat)
     for (int i = 0; i < LOOP_TIMES; ++i)
     {
         random_roi();
+=======
+INSTANTIATE_TEST_CASE_P(Filter, Laplacian, Combine(
+                        Values(CV_8UC1, CV_8UC3, CV_8UC4 /*, CV_32FC1, CV_32FC3, CV_32FC4*/),
+                        Values(Size(3, 3)),
+                        Values(Size(0, 0)), //not use
+                        Values(0)));        //not use
+
+INSTANTIATE_TEST_CASE_P(Filter, ErodeDilate, Combine(
+                        Values(CV_8UC1, CV_8UC4 /*, CV_32FC1, CV_32FC4*/),
+                        Values(Size(0, 0)), //not use
+                        Values(Size(0, 0)), //not use
+                        Values(1)));
+>>>>>>> Some of function was enabled on Qualcomm S800 by changing grid size.
 
         medianBlur(src_roi, dst_roi, ksize);
         ocl::medianFilter(gsrc_roi, gdst_roi, ksize);
 
+<<<<<<< HEAD
         Near();
     }
 }
+=======
+INSTANTIATE_TEST_CASE_P(Filter, Sobel, Combine(
+                        Values(CV_8UC1, CV_8UC3, CV_8UC4 /*, CV_32FC1, CV_32FC3, CV_32FC4*/),
+                        Values(Size(3, 3), Size(5, 5)),
+                        Values(Size(1, 0), Size(1, 1), Size(2, 0), Size(2, 1)),
+                        Values((MatType)cv::BORDER_CONSTANT, (MatType)cv::BORDER_REPLICATE)));
+>>>>>>> Some of function was enabled on Qualcomm S800 by changing grid size.
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+<<<<<<< HEAD
 #define FILTER_BORDER_SET_NO_ISOLATED \
     Values((int)BORDER_CONSTANT, (int)BORDER_REPLICATE, (int)BORDER_REFLECT, (int)BORDER_WRAP, (int)BORDER_REFLECT_101/*, \
             (int)BORDER_CONSTANT|BORDER_ISOLATED, (int)BORDER_REPLICATE|BORDER_ISOLATED, \
@@ -376,6 +407,19 @@ OCL_TEST_P(MedianFilter, Mat)
             (int)BORDER_CONSTANT|BORDER_ISOLATED, (int)BORDER_REPLICATE|BORDER_ISOLATED, \
             (int)BORDER_REFLECT|BORDER_ISOLATED, (int)BORDER_WRAP|BORDER_ISOLATED, \
             (int)BORDER_REFLECT_101|BORDER_ISOLATED*/) // WRAP and ISOLATED are not supported by cv:: version
+=======
+INSTANTIATE_TEST_CASE_P(Filter, Scharr, Combine(
+                        Values(CV_8UC1, CV_8UC3, CV_8UC4 /*, CV_32FC1, CV_32FC4*/),
+                        Values(Size(0, 0)), //not use
+                        Values(Size(0, 1), Size(1, 0)),
+                        Values((MatType)cv::BORDER_CONSTANT, (MatType)cv::BORDER_REPLICATE)));
+
+INSTANTIATE_TEST_CASE_P(Filter, GaussianBlur, Combine(
+                        Values(CV_8UC1, CV_8UC3, CV_8UC4 /*, CV_32FC1, CV_32FC4*/),
+                        Values(Size(3, 3), Size(5, 5)),
+                        Values(Size(0, 0)), //not use
+                        Values((MatType)cv::BORDER_CONSTANT, (MatType)cv::BORDER_REPLICATE)));
+>>>>>>> Some of function was enabled on Qualcomm S800 by changing grid size.
 
 #define FILTER_DATATYPES Values(CV_8UC1, CV_8UC2, CV_8UC3, CV_8UC4, \
                                 CV_32FC1, CV_32FC3, CV_32FC4, \
@@ -438,12 +482,19 @@ INSTANTIATE_TEST_CASE_P(Filter, GaussianBlurTest, Combine(
                             Bool()));
 
 INSTANTIATE_TEST_CASE_P(Filter, Filter2D, testing::Combine(
+<<<<<<< HEAD
                             FILTER_DATATYPES,
                             Values(3, 15), // TODO 25: CPU implementation has some issues
                             Values(Size(-1, -1), Size(0, 0), Size(2, 1)), // anchor
                             FILTER_BORDER_SET_NO_WRAP_NO_ISOLATED,
                             Values(0.0), // not used
                             Bool()));
+=======
+                        Values(CV_8UC1, CV_8UC1 /*, CV_32FC1, CV_32FC4*/),
+                        Values(Size(3, 3), Size(15, 15), Size(25, 25)),
+                        Values(Size(0, 0)), //not use
+                        Values((MatType)cv::BORDER_CONSTANT, (MatType)cv::BORDER_REFLECT101, (MatType)cv::BORDER_REPLICATE, (MatType)cv::BORDER_REFLECT)));
+>>>>>>> Some of function was enabled on Qualcomm S800 by changing grid size.
 
 INSTANTIATE_TEST_CASE_P(Filter, Bilateral, Combine(
                             Values(CV_8UC1, CV_8UC3),
