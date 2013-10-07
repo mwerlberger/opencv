@@ -206,7 +206,7 @@ static void GPUErode(const oclMat &src, oclMat &dst, oclMat &mat_kernel,
     int srcOffset_y = srcOffset / srcStep;
     Context *clCxt = src.clCxt;
     string kernelName;
-    size_t localThreads[3] = {16, 16, 1};
+    size_t localThreads[3] = {16, 10, 1};
     size_t globalThreads[3] = {(src.cols + localThreads[0] - 1) / localThreads[0] *localThreads[0], (src.rows + localThreads[1] - 1) / localThreads[1] *localThreads[1], 1};
 
     if (src.type() == CV_8UC1)
@@ -284,7 +284,7 @@ static void GPUDilate(const oclMat &src, oclMat &dst, oclMat &mat_kernel,
     int srcOffset_y = srcOffset / srcStep;
     Context *clCxt = src.clCxt;
     string kernelName;
-    size_t localThreads[3] = {16, 16, 1};
+    size_t localThreads[3] = {16, 10, 1};
     size_t globalThreads[3] = {(src.cols + localThreads[0] - 1) / localThreads[0] *localThreads[0],
                                (src.rows + localThreads[1] - 1) / localThreads[1] *localThreads[1], 1};
 
@@ -548,6 +548,8 @@ public:
 static void GPUFilter2D(const oclMat &src, oclMat &dst, const oclMat &mat_kernel,
     const Size &ksize, const Point& anchor, const int borderType)
 {
+    printf("Into GPUFilter2D() call\n");
+
     CV_Assert(src.clCxt == dst.clCxt);
     CV_Assert((src.cols == dst.cols) &&
               (src.rows == dst.rows));
@@ -570,7 +572,7 @@ static void GPUFilter2D(const oclMat &src, oclMat &dst, const oclMat &mat_kernel
 
     int paddingPixels = filterWidth & (-2);
 
-    size_t localThreads[3]  = {ksize_3x3 ? 256 : 16, ksize_3x3 ? 1 : 16, 1};
+    size_t localThreads[3]  = {ksize_3x3 ? 128 : 16, ksize_3x3 ? 1 : 10, 1};
     size_t globalThreads[3] = {src.wholecols, src.wholerows, 1};
 
     int cn =  src.oclchannels();
@@ -762,7 +764,7 @@ static void GPUFilterBox_8u_C1R(const oclMat &src, oclMat &dst,
     char build_options[150];
     sprintf(build_options, "-D anX=%d -D anY=%d -D ksX=%d -D ksY=%d -D %s", anchor.x, anchor.y, ksize.width, ksize.height, btype);
 
-    size_t blockSizeX = 256, blockSizeY = 1;
+    size_t blockSizeX = 128, blockSizeY = 1;
     size_t gSize = blockSizeX - (ksize.width - 1);
     size_t threads = (dst.offset % dst.step % 4 + dst.cols + 3) / 4;
     size_t globalSizeX = threads % gSize == 0 ? threads / gSize * blockSizeX : (threads / gSize + 1) * blockSizeX;
@@ -824,7 +826,7 @@ static void GPUFilterBox_8u_C4R(const oclMat &src, oclMat &dst,
     char build_options[150];
     sprintf(build_options, "-D anX=%d -D anY=%d -D ksX=%d -D ksY=%d -D %s", anchor.x, anchor.y, ksize.width, ksize.height, btype);
 
-    size_t blockSizeX = 256, blockSizeY = 1;
+    size_t blockSizeX = 160, blockSizeY = 1;
     size_t gSize = blockSizeX - ksize.width / 2 * 2;
     size_t globalSizeX = (src.cols) % gSize == 0 ? src.cols / gSize * blockSizeX : (src.cols / gSize + 1) * blockSizeX;
     size_t rows_per_thread = 2;
@@ -886,7 +888,7 @@ static void GPUFilterBox_32F_C1R(const oclMat &src, oclMat &dst,
     char build_options[150];
     sprintf(build_options, "-D anX=%d -D anY=%d -D ksX=%d -D ksY=%d -D %s", anchor.x, anchor.y, ksize.width, ksize.height, btype);
 
-    size_t blockSizeX = 256, blockSizeY = 1;
+    size_t blockSizeX = 128, blockSizeY = 1;
     size_t gSize = blockSizeX - ksize.width / 2 * 2;
     size_t globalSizeX = (src.cols) % gSize == 0 ? src.cols / gSize * blockSizeX : (src.cols / gSize + 1) * blockSizeX;
     size_t rows_per_thread = 2;
@@ -949,7 +951,7 @@ static void GPUFilterBox_32F_C4R(const oclMat &src, oclMat &dst,
     char build_options[150];
     sprintf(build_options, "-D anX=%d -D anY=%d -D ksX=%d -D ksY=%d -D %s", anchor.x, anchor.y, ksize.width, ksize.height, btype);
 
-    size_t blockSizeX = 256, blockSizeY = 1;
+    size_t blockSizeX = 128, blockSizeY = 1;
     size_t gSize = blockSizeX - ksize.width / 2 * 2;
     size_t globalSizeX = (src.cols) % gSize == 0 ? src.cols / gSize * blockSizeX : (src.cols / gSize + 1) * blockSizeX;
     size_t rows_per_thread = 2;
@@ -1068,7 +1070,7 @@ void linearRowFilter_gpu(const oclMat &src, const oclMat &dst, oclMat mat_kernel
     Context *clCxt = src.clCxt;
     int channels = src.oclchannels();
 
-    size_t localThreads[3] = {16, 16, 1};
+    size_t localThreads[3] = {16, 10, 1};
     string kernelName = "row_filter";
 
     char btype[30];
@@ -1200,7 +1202,7 @@ void linearColumnFilter_gpu(const oclMat &src, const oclMat &dst, oclMat mat_ker
     Context *clCxt = src.clCxt;
     int channels = src.oclchannels();
 
-    size_t localThreads[3] = {16, 16, 1};
+    size_t localThreads[3] = {16, 10, 1};
     string kernelName = "col_filter";
 
     char btype[30];

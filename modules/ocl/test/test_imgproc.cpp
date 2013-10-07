@@ -692,6 +692,7 @@ struct WarpAffine : WarpTestBase {};
 
 TEST_P(WarpAffine, Mat)
 {
+    printf("TEST_P(WarpAffine, Mat)\n");
     static const double coeffs[2][3] =
     {
         {cos(CV_PI / 6), -sin(CV_PI / 6), 100.0},
@@ -703,8 +704,11 @@ TEST_P(WarpAffine, Mat)
     {
         random_roi();
 
+        printf("before cv::warpAffine()\n");
         cv::warpAffine(mat1_roi, dst_roi, M, size, interpolation);
+        printf("after cv::warpAffine()\n");
         cv::ocl::warpAffine(gmat1, gdst, M, size, interpolation);
+        printf("before cv::ocl::warpAffine()\n");
 
         cv::Mat cpu_dst;
         gdst_whole.download(cpu_dst);

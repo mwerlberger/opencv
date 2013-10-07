@@ -136,9 +136,11 @@ TEST_P(ConvertTo, Accuracy)
     for (int j = 0; j < LOOP_TIMES; j++)
     {
         random_roi();
-
+        printf("before mat_roi.convertTo(dst_roi, dst_type)\n");
         mat_roi.convertTo(dst_roi, dst_type);
+        printf("after mat_roi.convertTo(dst_roi, dst_type)\n");
         gsrc.convertTo(gdst, dst_type);
+        printf("after gsrc.convertTo(gdst, dst_type)\n");
 
         EXPECT_MAT_NEAR(dst, Mat(gdst_whole), src_depth == CV_64F ? 1.0 : 0.0);
         EXPECT_MAT_NEAR(dst_roi, Mat(gdst), src_depth == CV_64F ? 1.0 : 0.0);

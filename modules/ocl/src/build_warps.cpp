@@ -90,7 +90,7 @@ void cv::ocl::buildWarpPlaneMaps(Size /*src_size*/, Rect dst_roi, const Mat &K, 
     args.push_back( make_pair( sizeof(cl_float), (void *)&scale));
 
     size_t globalThreads[3] = {map_x.cols, map_x.rows, 1};
-    size_t localThreads[3]  = {32, 8, 1};
+    size_t localThreads[3]  = {32, 4, 1};
     openCLExecuteKernel(clCxt, &build_warps, kernelName, globalThreads, localThreads, args, -1, -1);
 }
 
@@ -130,7 +130,7 @@ void cv::ocl::buildWarpCylindricalMaps(Size /*src_size*/, Rect dst_roi, const Ma
     args.push_back( make_pair( sizeof(cl_float), (void *)&scale));
 
     size_t globalThreads[3] = {map_x.cols, map_x.rows, 1};
-    size_t localThreads[3]  = {32, 8, 1};
+    size_t localThreads[3]  = {32, 4, 1};
     openCLExecuteKernel(clCxt, &build_warps, kernelName, globalThreads, localThreads, args, -1, -1);
 }
 
@@ -169,14 +169,14 @@ void cv::ocl::buildWarpSphericalMaps(Size /*src_size*/, Rect dst_roi, const Mat 
     args.push_back( make_pair( sizeof(cl_float), (void *)&scale));
 
     size_t globalThreads[3] = {map_x.cols, map_x.rows, 1};
-    size_t localThreads[3]  = {32, 8, 1};
+    size_t localThreads[3]  = {32, 4, 1};
     openCLExecuteKernel(clCxt, &build_warps, kernelName, globalThreads, localThreads, args, -1, -1);
 }
 
 
 void cv::ocl::buildWarpAffineMaps(const Mat &M, bool inverse, Size dsize, oclMat &xmap, oclMat &ymap)
 {
-
+    printf("Into cv::ocl::buildWarpAffineMaps()\n");
     CV_Assert(M.rows == 2 && M.cols == 3);
 
     xmap.create(dsize, CV_32FC1);
@@ -186,12 +186,18 @@ void cv::ocl::buildWarpAffineMaps(const Mat &M, bool inverse, Size dsize, oclMat
     Mat coeffsMat(2, 3, CV_32F, (void *)coeffs);
 
     if (inverse)
+    {
+        printf("before M.convertTo(coeffsMat, coeffsMat.type());\n");
         M.convertTo(coeffsMat, coeffsMat.type());
+        printf("after M.convertTo(coeffsMat, coeffsMat.type());\n");
+    }
     else
     {
         cv::Mat iM;
         invertAffineTransform(M, iM);
+        printf("before iM.convertTo(coeffsMat, coeffsMat.type());\n");
         iM.convertTo(coeffsMat, coeffsMat.type());
+        printf("after iM.convertTo(coeffsMat, coeffsMat.type());\n");
     }
 
     oclMat coeffsOclMat(coeffsMat.reshape(1, 1));
@@ -209,7 +215,7 @@ void cv::ocl::buildWarpAffineMaps(const Mat &M, bool inverse, Size dsize, oclMat
     args.push_back( make_pair( sizeof(cl_int), (void *)&ymap.step));
 
     size_t globalThreads[3] = {xmap.cols, xmap.rows, 1};
-    size_t localThreads[3]  = {32, 8, 1};
+    size_t localThreads[3]  = {32, 4, 1};
     openCLExecuteKernel(clCxt, &build_warps, kernelName, globalThreads, localThreads, args, -1, -1);
 }
 
@@ -248,6 +254,6 @@ void cv::ocl::buildWarpPerspectiveMaps(const Mat &M, bool inverse, Size dsize, o
     args.push_back( make_pair( sizeof(cl_int), (void *)&ymap.step));
 
     size_t globalThreads[3] = {xmap.cols, xmap.rows, 1};
-    size_t localThreads[3]  = {32, 8, 1};
+    size_t localThreads[3]  = {32, 4, 1};
     openCLExecuteKernel(clCxt, &build_warps, kernelName, globalThreads, localThreads, args, -1, -1);
 }

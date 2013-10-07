@@ -86,7 +86,7 @@ static void arithmetic_run_generic(const oclMat &src1, const oclMat &src2, const
     int dststep1 = dst.step / dst.elemSize(), dstoffset1 = dst.offset / dst.elemSize();
     oclMat m;
 
-    size_t localThreads[3]  = { 16, 16, 1 };
+    size_t localThreads[3]  = { 16, 10, 1 };
     size_t globalThreads[3] = { dst.cols, dst.rows, 1 };
 
     std::string kernelName = "arithm_binary_op";
@@ -323,7 +323,7 @@ static void arithmetic_sum_buffer_run(const oclMat &src, cl_mem &dst, int groupn
     args.push_back( make_pair( sizeof(cl_mem) , (void *)&src.data));
     args.push_back( make_pair( sizeof(cl_mem) , (void *)&dst ));
     size_t globalThreads[3] = { groupnum * 256, 1, 1 };
-    size_t localThreads[3] = { 256, 1, 1 };
+    size_t localThreads[3] = { 160, 1, 1 };
 
     openCLExecuteKernel(src.clCxt, &arithm_sum, "arithm_op_sum", globalThreads, localThreads,
                         args, -1, -1, buildOptions.c_str());
@@ -582,7 +582,7 @@ static void arithm_absdiff_nonsaturate_run(const oclMat & src1, const oclMat & s
     int diffstep1 = diff.step / diff.elemSize(), diffoffset1 = diff.offset / diff.elemSize();
 
     string kernelName = "arithm_absdiff_nonsaturate";
-    size_t localThreads[3]  = { 16, 16, 1 };
+    size_t localThreads[3]  = { 16, 10, 1 };
     size_t globalThreads[3] = { diff.cols, diff.rows, 1 };
 
     const char * const typeMap[] = { "uchar", "char", "ushort", "short", "int", "float", "double" };
@@ -848,7 +848,7 @@ static void arithmetic_exp_log_run(const oclMat &src, oclMat &dst, string kernel
     int srcoffset1 = src.offset / src.elemSize1(), dstoffset1 = dst.offset / dst.elemSize1();
     int srcstep1 = src.step1(), dststep1 = dst.step1();
 
-    size_t localThreads[3]  = { 64, 4, 1 };
+    size_t localThreads[3]  = { 64, 2, 1 };
     size_t globalThreads[3] = { dst.cols, dst.rows, 1 };
 
     std::string buildOptions = format("-D srcT=%s",
@@ -898,7 +898,7 @@ static void arithmetic_magnitude_phase_run(const oclMat &src1, const oclMat &src
     int offset_cols = ((dst.offset % dst.step) / dst.elemSize1()) & (vector_length - 1);
     int cols = divUp(dst.cols * channels + offset_cols, vector_length);
 
-    size_t localThreads[3]  = { 64, 4, 1 };
+    size_t localThreads[3]  = { 64, 2, 1 };
     size_t globalThreads[3] = { cols, dst.rows, 1 };
 
     vector<pair<size_t , const void *> > args;
@@ -940,7 +940,7 @@ static void arithmetic_phase_run(const oclMat &src1, const oclMat &src2, oclMat 
     int src2step1 = src2.step / src2.elemSize1(), src2offset1 = src2.offset / src2.elemSize1();
     int dststep1 = dst.step / dst.elemSize1(), dstoffset1 = dst.offset / dst.elemSize1();
 
-    size_t localThreads[3]  = { 64, 4, 1 };
+    size_t localThreads[3]  = { 64, 2, 1 };
     size_t globalThreads[3] = { cols1, dst.rows, 1 };
 
     vector<pair<size_t , const void *> > args;
@@ -987,7 +987,7 @@ static void arithmetic_cartToPolar_run(const oclMat &src1, const oclMat &src2, o
 
     int cols = src1.cols * channels;
 
-    size_t localThreads[3]  = { 64, 4, 1 };
+    size_t localThreads[3]  = { 64, 2, 1 };
     size_t globalThreads[3] = { cols, src1.rows, 1 };
 
     int tmp = angleInDegrees ? 1 : 0;
@@ -1041,7 +1041,7 @@ static void arithmetic_ptc_run(const oclMat &src1, const oclMat &src2, oclMat &d
     int cols = src2.cols * channels;
     int rows = src2.rows;
 
-    size_t localThreads[3]  = { 64, 4, 1 };
+    size_t localThreads[3]  = { 64, 2, 1 };
     size_t globalThreads[3] = { cols, rows, 1 };
 
     int tmp = angleInDegrees ? 1 : 0;
@@ -1090,6 +1090,7 @@ void cv::ocl::polarToCart(const oclMat &magnitude, const oclMat &angle, oclMat &
 
 static void arithmetic_minMaxLoc_run(const oclMat &src, cl_mem &dst, int vlen , int groupnum)
 {
+    printf("Into arithmetic_minMaxLoc_run1()\n");
     vector<pair<size_t , const void *> > args;
     int all_cols = src.step / (vlen * src.elemSize1());
     int pre_cols = (src.offset % src.step) / (vlen * src.elemSize1());
@@ -1108,14 +1109,15 @@ static void arithmetic_minMaxLoc_run(const oclMat &src, cl_mem &dst, int vlen , 
     args.push_back( make_pair( sizeof(cl_mem) , (void *)&dst ));
     char build_options[50];
     sprintf(build_options, "-D DEPTH_%d -D REPEAT_S%d -D REPEAT_E%d", src.depth(), repeat_s, repeat_e);
-    size_t gt[3] = {groupnum * 256, 1, 1}, lt[3] = {256, 1, 1};
+    size_t gt[3] = {groupnum * 256, 1, 1}, lt[3] = {160, 1, 1};
     openCLExecuteKernel(src.clCxt, &arithm_minMaxLoc, "arithm_op_minMaxLoc", gt, lt, args, -1, -1, build_options);
 }
 
 static void arithmetic_minMaxLoc_mask_run(const oclMat &src, const oclMat &mask, cl_mem &dst, int vlen, int groupnum)
 {
+    printf("Into arithmetic_minMaxLoc_run2()\n");
     vector<pair<size_t , const void *> > args;
-    size_t gt[3] = {groupnum * 256, 1, 1}, lt[3] = {256, 1, 1};
+    size_t gt[3] = {groupnum * 256, 1, 1}, lt[3] = {160, 1, 1};
     char build_options[50];
     if (src.oclchannels() == 1)
     {
@@ -1146,6 +1148,7 @@ template <typename T>
 void arithmetic_minMaxLoc(const oclMat &src, double *minVal, double *maxVal,
                           Point *minLoc, Point *maxLoc, const oclMat &mask)
 {
+    printf("Into arithmetic_minMaxLoc<T>\n");
     CV_Assert(src.oclchannels() == 1);
     size_t groupnum = src.clCxt->getDeviceInfo().maxComputeUnits;
     CV_Assert(groupnum != 0);
@@ -1155,11 +1158,15 @@ void arithmetic_minMaxLoc(const oclMat &src, double *minVal, double *maxVal,
     cl_mem dstBuffer = openCLCreateBuffer(clCxt, CL_MEM_WRITE_ONLY, dbsize);
     *minVal = std::numeric_limits<double>::max() , *maxVal = -std::numeric_limits<double>::max();
 
+    printf("before arithmetic_minMaxLoc_run/arithmetic_minMaxLoc_mask_run\n");
     if (mask.empty())
         arithmetic_minMaxLoc_run(src, dstBuffer, vlen, groupnum);
     else
         arithmetic_minMaxLoc_mask_run(src, mask, dstBuffer, vlen, groupnum);
 
+    printf("after arithmetic_minMaxLoc_run/arithmetic_minMaxLoc_mask_run\n");
+    
+    
     AutoBuffer<T> _buf(groupnum * vlen * 4);
     T *p = (T*)_buf;
     memset(p, 0, dbsize);
@@ -1255,7 +1262,7 @@ static void arithmetic_countNonZero_run(const oclMat &src, cl_mem &dst, int grou
     args.push_back( make_pair( sizeof(cl_mem) , (void *)&dst ));
 
     size_t globalThreads[3] = { groupnum * 256, 1, 1 };
-    size_t localThreads[3] = { 256, 1, 1 };
+    size_t localThreads[3] = { 160, 1, 1 };
 
     openCLExecuteKernel(src.clCxt, &arithm_nonzero, kernelName, globalThreads, localThreads,
                         args, -1, -1, buildOptions.c_str());
@@ -1317,7 +1324,7 @@ static void bitwise_unary_run(const oclMat &src1, oclMat &dst, string kernelName
     int offset_cols = (dst.offset / dst.elemSize1()) & (vector_length - 1);
     int cols = divUp(dst.cols * channels + offset_cols, vector_length);
 
-    size_t localThreads[3]  = { 64, 4, 1 };
+    size_t localThreads[3]  = { 64, 2, 1 };
     size_t globalThreads[3] = { cols, dst.rows, 1 };
 
     int dst_step1 = dst.cols * dst.elemSize();
@@ -1361,7 +1368,7 @@ static void bitwise_binary_run(const oclMat &src1, const oclMat &src2, const Sca
     std::string kernelName("arithm_bitwise_binary");
     std::string buildOptions = format("-D Operation=%c", operationMap[operationType]);
 
-    size_t localThreads[3]  = { 16, 16, 1 };
+    size_t localThreads[3]  = { 16, 10, 1 };
     size_t globalThreads[3] = { cols1, dst.rows, 1 };
 
     vector<pair<size_t , const void *> > args;
@@ -1617,7 +1624,7 @@ void cv::ocl::addWeighted(const oclMat &src1, double alpha, const oclMat &src2, 
                                       typeMap[depth], hasDouble ? "double" : "float", typeMap[depth],
                                       depth >= CV_32F ? "" : "_sat_rte");
 
-    size_t localThreads[3]  = { 256, 1, 1 };
+    size_t localThreads[3]  = { 160, 1, 1 };
     size_t globalThreads[3] = { cols1, dst.rows, 1};
 
     float alpha_f = static_cast<float>(alpha),
@@ -1673,7 +1680,7 @@ static void arithmetic_pow_run(const oclMat &src1, double p, oclMat &dst, string
     int cols = divUp(dst.cols * channels + offset_cols, vector_length);
     int rows = dst.rows;
 
-    size_t localThreads[3]  = { 64, 4, 1 };
+    size_t localThreads[3]  = { 64, 2, 1 };
     size_t globalThreads[3] = { cols, rows, 1 };
 
     int dst_step1 = dst.cols * dst.elemSize();
@@ -1728,7 +1735,7 @@ void cv::ocl::setIdentity(oclMat& src, const Scalar & scalar)
     CV_Assert(src.step % src.elemSize() == 0);
 
     int src_step1 = src.step / src.elemSize(), src_offset1 = src.offset / src.elemSize();
-    size_t local_threads[] = { 16, 16, 1 };
+    size_t local_threads[] = { 16, 10, 1 };
     size_t global_threads[] = { src.cols, src.rows, 1 };
 
     const char * const typeMap[] = { "uchar", "char", "ushort", "short", "int", "float", "double" };

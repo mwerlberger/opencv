@@ -158,51 +158,51 @@ namespace
         ASSERT_EQ(0, badCount);
     }
 
-    TEST_P(BruteForceMatcher, RadiusMatch_Single)
-    {
-        float radius = 1.f / countFactor;
-
-        cv::ocl::BruteForceMatcher_OCL_base matcher(distType);
-
-        std::vector< std::vector<cv::DMatch> > matches;
-        matcher.radiusMatch(cv::ocl::oclMat(query), cv::ocl::oclMat(train), matches, radius);
-
-        ASSERT_EQ(static_cast<size_t>(queryDescCount), matches.size());
-
-        int badCount = 0;
-        for (size_t i = 0; i < matches.size(); i++)
-        {
-            if ((int)matches[i].size() != 1)
-            {
-                badCount++;
-            }
-            else
-            {
-                cv::DMatch match = matches[i][0];
-                if ((match.queryIdx != (int)i) || (match.trainIdx != (int)i * countFactor) || (match.imgIdx != 0))
-                    badCount++;
-            }
-        }
-
-        ASSERT_EQ(0, badCount);
-    }
-
-    INSTANTIATE_TEST_CASE_P(OCL_Features2D, BruteForceMatcher,
-        testing::Combine(
-        testing::Values(
-            DistType(cv::ocl::BruteForceMatcher_OCL_base::L1Dist),
-            DistType(cv::ocl::BruteForceMatcher_OCL_base::L2Dist)/*,
-            DistType(cv::ocl::BruteForceMatcher_OCL_base::HammingDist)*/
-        ),
-        testing::Values(
-            DescriptorSize(57),
-            DescriptorSize(64),
-            DescriptorSize(83),
-            DescriptorSize(128),
-            DescriptorSize(179),
-            DescriptorSize(256),
-            DescriptorSize(304))
-        )
-    );
+//     TEST_P(BruteForceMatcher, RadiusMatch_Single)
+//     {
+//         float radius = 1.f / countFactor;
+// 
+//         cv::ocl::BruteForceMatcher_OCL_base matcher(distType);
+// 
+//         std::vector< std::vector<cv::DMatch> > matches;
+//         matcher.radiusMatch(cv::ocl::oclMat(query), cv::ocl::oclMat(train), matches, radius);
+// 
+//         ASSERT_EQ(static_cast<size_t>(queryDescCount), matches.size());
+// 
+//         int badCount = 0;
+//         for (size_t i = 0; i < matches.size(); i++)
+//         {
+//             if ((int)matches[i].size() != 1)
+//             {
+//                 badCount++;
+//             }
+//             else
+//             {
+//                 cv::DMatch match = matches[i][0];
+//                 if ((match.queryIdx != (int)i) || (match.trainIdx != (int)i * countFactor) || (match.imgIdx != 0))
+//                     badCount++;
+//             }
+//         }
+// 
+//         ASSERT_EQ(0, badCount);
+//     }
+// 
+//     INSTANTIATE_TEST_CASE_P(OCL_Features2D, BruteForceMatcher,
+//         testing::Combine(
+//         testing::Values(
+//             DistType(cv::ocl::BruteForceMatcher_OCL_base::L1Dist),
+//             DistType(cv::ocl::BruteForceMatcher_OCL_base::L2Dist)/*,
+//             DistType(cv::ocl::BruteForceMatcher_OCL_base::HammingDist)*/
+//         ),
+//         testing::Values(
+//             DescriptorSize(57),
+//             DescriptorSize(64),
+//             DescriptorSize(83),
+//             DescriptorSize(128),
+//             DescriptorSize(179),
+//             DescriptorSize(256),
+//             DescriptorSize(304))
+//         )
+//     );
 } // namespace
 #endif

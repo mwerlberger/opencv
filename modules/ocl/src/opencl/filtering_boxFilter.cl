@@ -79,7 +79,7 @@
 #define ADDR_B(i, b_edge, addr)    ((i) >= (b_edge) ? (i)-(b_edge) : (addr))
 #endif
 
-#define THREADS 256
+#define THREADS 160
 #define ELEM(i, l_edge, r_edge, elem1, elem2) (i) >= (l_edge) && (i) < (r_edge) ? (elem1) : (elem2)
 
 inline void update_dst_C1_D0(__global uchar *dst, __local uint* temp,
