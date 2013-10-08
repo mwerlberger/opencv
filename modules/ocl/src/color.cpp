@@ -223,7 +223,6 @@ void cvtColor_caller(const oclMat &src, oclMat &dst, int code, int dcn)
         CV_Assert(scn == 3 || scn == 4);
         bidx = code == CV_BGR2GRAY || code == CV_BGRA2GRAY ? 0 : 2;
         dst.create(sz, CV_MAKETYPE(depth, 1));
-        printf("Calling RGB2Gray_caller()\n");
         RGB2Gray_caller(src, dst, bidx);
         break;
     }
@@ -302,6 +301,5 @@ void cvtColor_caller(const oclMat &src, oclMat &dst, int code, int dcn)
 
 void cv::ocl::cvtColor(const oclMat &src, oclMat &dst, int code, int dcn)
 {
-    printf("Calling cvtColor_caller()\n");
     cvtColor_caller(src, dst, code, dcn);
 }

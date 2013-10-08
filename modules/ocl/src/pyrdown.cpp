@@ -62,7 +62,7 @@ static void pyrdown_run(const oclMat &src, const oclMat &dst)
     Context  *clCxt = src.clCxt;
     string kernelName = "pyrDown";
 
-    size_t localThreads[3]  = { 160, 1, 1 };
+    size_t localThreads[3]  = { 256, 1, 1 };
     size_t globalThreads[3] = { src.cols, dst.rows, 1};
 
     vector<pair<size_t , const void *> > args;
@@ -74,6 +74,7 @@ static void pyrdown_run(const oclMat &src, const oclMat &dst)
     args.push_back( make_pair( sizeof(cl_int), (void *)&dst.step ));
     args.push_back( make_pair( sizeof(cl_int), (void *)&dst.cols));
 
+    // kernel use fixed grid size, replace localThreads on NULL is imposible without kernel changes
     openCLExecuteKernel(clCxt, &pyr_down, kernelName, globalThreads, localThreads, args, src.oclchannels(), src.depth());
 }
 //////////////////////////////////////////////////////////////////////////////
