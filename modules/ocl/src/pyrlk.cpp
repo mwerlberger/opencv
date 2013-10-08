@@ -81,7 +81,6 @@ static void lkSparse_run(oclMat &I, oclMat &J,
                          const oclMat &prevPts, oclMat &nextPts, oclMat &status, oclMat& err, bool /*GET_MIN_EIGENVALS*/, int ptcount,
                          int level, dim3 patch, Size winSize, int iters)
 {
-    printf("into ()\n");
     Context  *clCxt = I.clCxt;
     int elemCntPerRow = I.step / I.elemSize();
     string kernelName = "lkSparse";
@@ -158,7 +157,6 @@ void cv::ocl::PyrLKOpticalFlow::sparse(const oclMat &prevImg, const oclMat &next
         if (err) err->release();
         return;
     }
-    printf("into cv::ocl::PyrLKOpticalFlow::sparse()\n");
     
     derivLambda = std::min(std::max(derivLambda, 0.0), 1.0);
 
@@ -197,10 +195,8 @@ void cv::ocl::PyrLKOpticalFlow::sparse(const oclMat &prevImg, const oclMat &next
         ensureSizeIsEnough(1, prevPts.cols, CV_32FC1, *err);
 
     // build the image pyramids.
-    printf("Before pyromid build\n");
     prevPyr_.resize(maxLevel + 1);
     nextPyr_.resize(maxLevel + 1);
-    printf("After pyromid build\n");
     
     if (cn == 1 || cn == 4)
     {
@@ -208,13 +204,11 @@ void cv::ocl::PyrLKOpticalFlow::sparse(const oclMat &prevImg, const oclMat &next
         nextImg.convertTo(nextPyr_[0], CV_32F);
     }
 
-    printf("before pyrDown\n");
     for (int level = 1; level <= maxLevel; ++level)
     {
         pyrDown(prevPyr_[level - 1], prevPyr_[level]);
         pyrDown(nextPyr_[level - 1], nextPyr_[level]);
     }
-    printf("after pyrDown\n");
     
     // dI/dx ~ Ix, dI/dy ~ Iy
     for (int level = maxLevel; level >= 0; level--)
@@ -231,7 +225,6 @@ void cv::ocl::PyrLKOpticalFlow::sparse(const oclMat &prevImg, const oclMat &next
 static void lkDense_run(oclMat &I, oclMat &J, oclMat &u, oclMat &v,
                         oclMat &prevU, oclMat &prevV, oclMat *err, Size winSize, int iters)
 {
-    printf("into lkDense_run()\n");
     Context  *clCxt = I.clCxt;
     bool isImageSupported = support_image2d();
     int elemCntPerRow = I.step / I.elemSize();

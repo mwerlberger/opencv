@@ -455,7 +455,7 @@ static void matmul_sigmod(oclMat & src, oclMat & src2, oclMat & dst, int src_row
     int src2_step = (int)src2.step / src2.elemSize();
     int dst_step = (int)dst.step / dst.elemSize();
     int x = MIN(16, src_rows);
-    int y = MIN(16, src2_cols);
+    int y = MIN(8, src2_cols);
     size_t localThreads[] = {x, y, 1};
     size_t globalThreads[] = {src2_cols, src_rows, 1};
     int width = var_count;
@@ -494,7 +494,7 @@ static void matmul_poly(oclMat & src, oclMat & src2, oclMat & dst, int src_rows,
     int src2_step = (int)src2.step / src2.elemSize();
     int dst_step = (int)dst.step / dst.elemSize();
     int x = MIN(16, src_rows);
-    int y = MIN(16, src2_cols);
+    int y = MIN(8, src2_cols);
     size_t localThreads[] = {x, y, 1};
     size_t globalThreads[] = {src2_cols, src_rows, 1};
     int width = var_count;
@@ -542,7 +542,7 @@ static void matmul_linear(oclMat & src, oclMat & src2, oclMat & dst, int src_row
     int src2_step = (int)src2.step / src2.elemSize();
     int dst_step = (int)dst.step / dst.elemSize();
     int x = MIN(16, src_rows);
-    int y = MIN(16, src2_cols);
+    int y = MIN(8, src2_cols);
     size_t localThreads[] = {x, y, 1};
     size_t globalThreads[] = {src2_cols, src_rows, 1};
     int width = var_count;
@@ -588,7 +588,7 @@ static void matmul_rbf(oclMat& src, oclMat& src_e, oclMat& dst, int src_rows, in
     int dst_step = (int)dst.step / dst.elemSize();
 
     int x = MIN(16, src_rows);
-    int y = MIN(16, src2_cols);
+    int y = MIN(8, src2_cols);
     size_t localThreads[] = {x, y, 1};
     size_t globalThreads[] = {src2_cols,  src_rows, 1};
     char build_options[50];

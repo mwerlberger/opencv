@@ -76,7 +76,6 @@ void RGB2Gray_caller(const oclMat &src, oclMat &dst, int bidx)
     args.push_back( make_pair( sizeof(cl_mem) , (void *)&src.data));
     args.push_back( make_pair( sizeof(cl_mem) , (void *)&dst.data));
     size_t gt[3] = {src.cols, src.rows, 1}, lt[3] = {16, 10, 1};
-    printf("Calling openCLExecuteKernel for RGB2Gray with lt %d, %d, %d\n", lt[0], lt[1], lt[2]);
     openCLExecuteKernel(src.clCxt, &cvt_color, "RGB2Gray", gt, lt, args, -1, -1, build_options);
 }
 void Gray2RGB_caller(const oclMat &src, oclMat &dst)
@@ -191,7 +190,6 @@ void cvtColor_caller(const oclMat &src, oclMat &dst, int code, int dcn)
         CV_Assert(scn == 3 || scn == 4);
         bidx = code == CV_BGR2GRAY || code == CV_BGRA2GRAY ? 0 : 2;
         dst.create(sz, CV_MAKETYPE(depth, 1));
-        printf("Calling RGB2Gray_caller()\n");
         RGB2Gray_caller(src, dst, bidx);
         break;
     }
@@ -270,6 +268,5 @@ void cvtColor_caller(const oclMat &src, oclMat &dst, int code, int dcn)
 
 void cv::ocl::cvtColor(const oclMat &src, oclMat &dst, int code, int dcn)
 {
-    printf("Calling cvtColor_caller()\n");
     cvtColor_caller(src, dst, code, dcn);
 }

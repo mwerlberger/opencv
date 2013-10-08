@@ -94,17 +94,12 @@ PARAM_TEST_CASE(CvtColor, cv::Size, MatDepth)
 {\
     cv::Mat src = img;\
     cv::ocl::oclMat ocl_img, dst;\
-    printf("before ocl_img.upload(img)\n"); \
     ocl_img.upload(img);\
-    printf("after ocl_img.upload(img)\n"); \
     cv::ocl::cvtColor(ocl_img, dst, CVTCODE(name));\
-    printf("after cv::ocl::cvtColor(ocl_img, dst, CVTCODE(name))\n"); \
     cv::Mat dst_gold;\
     cv::cvtColor(src, dst_gold, CVTCODE(name));\
     cv::Mat dst_mat;\
-    printf("before dst.download(dst_mat)\b"); \
     dst.download(dst_mat);\
-    printf("after dst.download(dst_mat)\b"); \
     EXPECT_MAT_NEAR(dst_gold, dst_mat, 1e-5);\
 }
 
@@ -118,8 +113,8 @@ TEST_P_CVTCOLOR(RGB2YUV)
 TEST_P_CVTCOLOR(BGR2YUV)
 TEST_P_CVTCOLOR(YUV2RGB)
 TEST_P_CVTCOLOR(YUV2BGR)
-//TEST_P_CVTCOLOR(RGB2YCrCb)
-//TEST_P_CVTCOLOR(BGR2YCrCb)
+TEST_P_CVTCOLOR(RGB2YCrCb)
+TEST_P_CVTCOLOR(BGR2YCrCb)
 
 PARAM_TEST_CASE(CvtColor_Gray2RGB, cv::Size, MatDepth, int)
 {

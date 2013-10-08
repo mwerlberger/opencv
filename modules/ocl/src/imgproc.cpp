@@ -333,7 +333,7 @@ namespace cv
                 kernelName = "resizeNN";
 
             //TODO: improve this kernel
-            size_t blkSizeX = 16, blkSizeY = 10;
+            size_t blkSizeX = 16, blkSizeY = 8;
             size_t glbSizeX;
             if(src.type() == CV_8UC1)
             {
@@ -464,7 +464,7 @@ namespace cv
             args.push_back( make_pair( sizeof(cl_int), (void *)&dstStep));
 
             size_t globalThreads[3] = {(src.cols + 18) / 16 * 16, (src.rows + 15) / 16 * 16, 1};
-            size_t localThreads[3] = {16, 10, 1};
+            size_t localThreads[3] = {16, 16, 1};
 
             if(m == 3)
             {
@@ -1394,7 +1394,7 @@ namespace cv
                 kernelName = "calc_sub_hist_border";
                 src_offset = mat_src.offset;
                 localThreads[0] = 1;
-                localThreads[1] = 160;
+                localThreads[1] = 256;
                 globalThreads[0] = left_col + right_col;
                 globalThreads[1] = (mat_src.rows + localThreads[1] - 1) / localThreads[1] * localThreads[1];
 
@@ -1417,7 +1417,7 @@ namespace cv
             Context  *clCxt = sub_hist.clCxt;
             string kernelName = "merge_hist";
 
-            size_t localThreads[3]  = { 160, 1, 1 };
+            size_t localThreads[3]  = { 256, 1, 1 };
             size_t globalThreads[3] = { HISTOGRAM256_BIN_COUNT *localThreads[0], 1, 1};
             int src_step = sub_hist.step >> 2;
             vector<pair<size_t , const void *> > args;
@@ -1700,7 +1700,7 @@ namespace cv
             oclMat oclspace_ofs(1, d * d, CV_32SC1, space_ofs);
 
             string kernelName = "bilateral";
-            size_t localThreads[3]  = { 16, 10, 1 };
+            size_t localThreads[3]  = { 16, 8, 1 };
             size_t globalThreads[3] = { (dst.cols + localThreads[0] - 1) / localThreads[0] *localThreads[0],
                                         (dst.rows + localThreads[1] - 1) / localThreads[1] *localThreads[1],
                                         1
