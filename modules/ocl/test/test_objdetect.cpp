@@ -181,9 +181,9 @@ INSTANTIATE_TEST_CASE_P(OCL_ObjDetect, HOG, testing::Combine(
                             testing::Values(MatType(CV_8UC1), MatType(CV_8UC4))));
 
 ///////////////////////////// Haar //////////////////////////////
-INSTANTIATE_TEST_CASE_P(OCL_ObjDetect, Haar,
-    Combine(Values(CV_HAAR_SCALE_IMAGE, 0),
-            Values(cascade_frontalface_alt/*, cascade_frontalface_alt2*/)));
+//INSTANTIATE_TEST_CASE_P(OCL_ObjDetect, Haar,
+//    Combine(Values(CV_HAAR_SCALE_IMAGE, 0),
+//            Values(cascade_frontalface_alt/*, cascade_frontalface_alt2*/)));
 
 // IMPLEMENT_PARAM_CLASS(CascadeName, std::string);
 // CascadeName cascade_frontalface_alt(std::string("haarcascade_frontalface_alt.xml"));

@@ -1003,7 +1003,6 @@ static void GPUFilterBox_32F_C4R(const oclMat &src, oclMat &dst,
         sprintf(btype, "BORDER_REFLECT_101");
         break;
     }
->>>>>>> Some of function was enabled on Qualcomm S800 by changing grid size.
 
     size_t tryWorkItems = src.clCxt->getDeviceInfo().maxWorkItemSizes[0];
     do {

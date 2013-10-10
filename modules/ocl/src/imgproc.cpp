@@ -608,8 +608,9 @@ namespace cv
                                                         1, 0, sizeof(float) * 2 * 3, float_coeffs, 0, 0, 0));
 
                 }
+
                 //TODO: improve this kernel
-                size_t blkSizeX = 16, blkSizeY = 10;
+                size_t blkSizeX = 16, blkSizeY = 4;
                 size_t glbSizeX;
                 size_t cols;
 
@@ -815,7 +816,7 @@ namespace cv
             args.push_back( make_pair( sizeof(cl_int) , (void *)&src.cols ));
             args.push_back( make_pair( sizeof(cl_int) , (void *)&src.step ));
             args.push_back( make_pair( sizeof(cl_int) , (void *)&t_sum.step));
-            size_t gt[3] = {((vcols + 1) / 2) * 256, 1, 1}, lt[3] = {256, 1, 1};
+            size_t gt[3] = {((vcols + 1) / 2) * 256, 1, 1}, lt[3] = {128, 1, 1};
             openCLExecuteKernel(src.clCxt, &imgproc_integral, "integral_cols", gt, lt, args, -1, depth);
 
             args.clear();
@@ -830,7 +831,7 @@ namespace cv
             args.push_back( make_pair( sizeof(cl_int) , (void *)&sqsum.step));
             args.push_back( make_pair( sizeof(cl_int) , (void *)&sum_offset));
             args.push_back( make_pair( sizeof(cl_int) , (void *)&sqsum_offset));
-            size_t gt2[3] = {t_sum.cols  * 32, 1, 1}, lt2[3] = {256, 1, 1};
+            size_t gt2[3] = {t_sum.cols  * 32, 1, 1}, lt2[3] = {128, 1, 1};
             openCLExecuteKernel(src.clCxt, &imgproc_integral, "integral_rows", gt2, lt2, args, -1, depth);
         }
 

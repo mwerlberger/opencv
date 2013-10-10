@@ -211,8 +211,8 @@ INSTANTIATE_TEST_CASE_P(SplitMerge, Merge, Combine(
                             Values(CV_8U, CV_8S, CV_16U, CV_16S, CV_32S, CV_32F), Values(1, 2, 3, 4), Bool()));
 
 
-INSTANTIATE_TEST_CASE_P(SplitMerge, Split , Combine(
-                            Values(CV_8U, CV_8S, CV_16U, CV_16S, CV_32S, CV_32F), Values(1, 2, 3, 4), Bool()));
+//INSTANTIATE_TEST_CASE_P(SplitMerge, Split , Combine(
+//                            Values(CV_8U, CV_8S, CV_16U, CV_16S, CV_32S, CV_32F), Values(1, 2, 3, 4), Bool()));
 
 
 #endif // HAVE_OPENCL
