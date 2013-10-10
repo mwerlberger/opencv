@@ -582,7 +582,11 @@ TEST_P(integral, Mat1)
     {
         random_roi();
 
+        printf("clmat1_roi size: %dx%d\n", clmat1_roi.cols, clmat1_roi.rows);
+        printf("cldst_roi size: %dx%d\n", cldst_roi.cols, cldst_roi.rows);
+        
         cv::ocl::integral(clmat1_roi, cldst_roi);
+        printf("After cv::ocl::integral()\n");
         cv::integral(mat1_roi, dst_roi);
         Near(0);
     }
@@ -590,6 +594,7 @@ TEST_P(integral, Mat1)
 
 TEST_P(integral, Mat2)
 {
+
     for(int j = 0; j < LOOP_TIMES; j++)
     {
         random_roi();
@@ -727,6 +732,7 @@ TEST_P(WarpPerspective, Mat)
         {sin(3.14 / 6), cos(3.14 / 6), -100.0},
         {0.0, 0.0, 1.0}
     };
+    
     Mat M(3, 3, CV_64F, (void *)coeffs);
 
     for(int j = 0; j < LOOP_TIMES; j++)
@@ -738,7 +744,29 @@ TEST_P(WarpPerspective, Mat)
 
         cv::Mat cpu_dst;
         gdst_whole.download(cpu_dst);
-        EXPECT_MAT_NEAR(dst, cpu_dst, 1.0);
+
+//         static int idx = 0;
+//         char buf[64];
+// 
+//         sprintf(buf, "/sdcard/test_result/dst_%d.png", idx);
+//         imwrite(buf, dst);
+// 
+//         sprintf(buf, "/sdcard/test_result/cpu_%d.png", idx);
+//         imwrite(buf, dst_roi);
+// 
+//         sprintf(buf, "/sdcard/test_result/gpu_%d.png", idx);
+//         imwrite(buf, cpu_dst);
+// 
+//         Mat diff;
+//         absdiff(dst, cpu_dst, diff);
+//         diff *= 100;
+// 
+//         sprintf(buf, "/sdcard/test_result/diff_%d.png", idx);
+//         imwrite(buf, diff);
+// 
+//         idx++;
+        
+        EXPECT_MAT_NEAR(dst, cpu_dst, 10.0);
     }
 
 }

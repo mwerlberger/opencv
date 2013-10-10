@@ -572,7 +572,7 @@ static void GPUFilter2D(const oclMat &src, oclMat &dst, const oclMat &mat_kernel
 
     int paddingPixels = filterWidth & (-2);
 
-    size_t localThreads[3]  = {ksize_3x3 ? 128 : 16, ksize_3x3 ? 1 : 10, 1};
+    size_t localThreads[3]  = {ksize_3x3 ? 128 : 16, ksize_3x3 ? 1 : 8, 1};
     size_t globalThreads[3] = {src.wholecols, src.wholerows, 1};
 
     int cn =  src.oclchannels();

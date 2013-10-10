@@ -179,6 +179,7 @@ TEST_P(Laplacian, Accuracy)
         random_roi();
         cv::Laplacian(mat1_roi, dst_roi, -1, ksize.width, 1);
         cv::ocl::Laplacian(gmat1, gdst, -1, ksize.width, 1);
+
         Near(1e-5);
     }
 }
@@ -413,40 +414,40 @@ TEST_P(AdaptiveBilateral, Mat)
 }
 
 INSTANTIATE_TEST_CASE_P(Filter, Blur, Combine(
-                        Values(CV_8UC1, CV_8UC3, CV_8UC4 /*, CV_32FC1, CV_32FC4*/),
+                        Values(CV_8UC1, CV_8UC3, CV_8UC4, CV_32FC1, CV_32FC4),
                         Values(cv::Size(3, 3), cv::Size(5, 5), cv::Size(7, 7)),
                         Values(Size(0, 0)), //not use
                         Values((MatType)cv::BORDER_CONSTANT, (MatType)cv::BORDER_REPLICATE, (MatType)cv::BORDER_REFLECT, (MatType)cv::BORDER_REFLECT_101)));
 
 
 INSTANTIATE_TEST_CASE_P(Filter, Laplacian, Combine(
-                        Values(CV_8UC1, CV_8UC3, CV_8UC4 /*, CV_32FC1, CV_32FC3, CV_32FC4*/),
+                        Values(CV_8UC1, CV_8UC3, CV_8UC4, CV_32FC1, CV_32FC3, CV_32FC4),
                         Values(Size(3, 3)),
                         Values(Size(0, 0)), //not use
                         Values(0)));        //not use
 
 INSTANTIATE_TEST_CASE_P(Filter, ErodeDilate, Combine(
-                        Values(CV_8UC1, CV_8UC4 /*, CV_32FC1, CV_32FC4*/),
+                        Values(CV_8UC1, CV_8UC4, CV_32FC1, CV_32FC4),
                         Values(Size(0, 0)), //not use
                         Values(Size(0, 0)), //not use
                         Values(1)));
 
 
 INSTANTIATE_TEST_CASE_P(Filter, Sobel, Combine(
-                        Values(CV_8UC1, CV_8UC3, CV_8UC4 /*, CV_32FC1, CV_32FC3, CV_32FC4*/),
+                        Values(CV_8UC1, CV_8UC3, CV_8UC4, CV_32FC1, CV_32FC3, CV_32FC4),
                         Values(Size(3, 3), Size(5, 5)),
                         Values(Size(1, 0), Size(1, 1), Size(2, 0), Size(2, 1)),
                         Values((MatType)cv::BORDER_CONSTANT, (MatType)cv::BORDER_REPLICATE)));
 
 
 INSTANTIATE_TEST_CASE_P(Filter, Scharr, Combine(
-                        Values(CV_8UC1, CV_8UC3, CV_8UC4 /*, CV_32FC1, CV_32FC4*/),
+                        Values(CV_8UC1, CV_8UC3, CV_8UC4, CV_32FC1, CV_32FC4),
                         Values(Size(0, 0)), //not use
                         Values(Size(0, 1), Size(1, 0)),
                         Values((MatType)cv::BORDER_CONSTANT, (MatType)cv::BORDER_REPLICATE)));
 
 INSTANTIATE_TEST_CASE_P(Filter, GaussianBlur, Combine(
-                        Values(CV_8UC1, CV_8UC3, CV_8UC4 /*, CV_32FC1, CV_32FC4*/),
+                        Values(CV_8UC1, CV_8UC3, CV_8UC4, CV_32FC1, CV_32FC4),
                         Values(Size(3, 3), Size(5, 5)),
                         Values(Size(0, 0)), //not use
                         Values((MatType)cv::BORDER_CONSTANT, (MatType)cv::BORDER_REPLICATE)));
@@ -454,7 +455,7 @@ INSTANTIATE_TEST_CASE_P(Filter, GaussianBlur, Combine(
 
 
 INSTANTIATE_TEST_CASE_P(Filter, Filter2D, testing::Combine(
-                        Values(CV_8UC1, CV_8UC1 /*, CV_32FC1, CV_32FC4*/),
+                        Values(CV_8UC1, CV_8UC1, CV_32FC1, CV_32FC4),
                         Values(Size(3, 3), Size(15, 15), Size(25, 25)),
                         Values(Size(0, 0)), //not use
                         Values((MatType)cv::BORDER_CONSTANT, (MatType)cv::BORDER_REFLECT101, (MatType)cv::BORDER_REPLICATE, (MatType)cv::BORDER_REFLECT)));

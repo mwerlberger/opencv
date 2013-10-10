@@ -394,6 +394,7 @@ struct ProgramFileCache
         std::vector<char> binary;
         if (!enable_disk_cache || !readConfigurationFromFile(options, binary))
         {
+            printf("clCreateProgramWithSource call\n");
             program = clCreateProgramWithSource(getClContext(ctx), 1, (const char**)&source->programStr, NULL, &status);
             openCLVerifyCall(status);
             cl_device_id device = getClDeviceID(ctx);
@@ -426,6 +427,7 @@ struct ProgramFileCache
         }
         else
         {
+            printf("clCreateProgramWithBinary call\n");
             cl_device_id device = getClDeviceID(ctx);
             size_t size = binary.size();
             const char* ptr = &binary[0];
