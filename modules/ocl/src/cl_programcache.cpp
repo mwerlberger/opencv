@@ -65,6 +65,13 @@
 #undef __CL_ENABLE_EXCEPTIONS
 #include <CL/cl.hpp>
 
+// HACK: uncomment macro to write all kernel name and build options
+// to log file it is needed for offline kernel compilation
+#define OCL_OPTION_LOG "kernels.log"
+
+// HACK: uncomment macro to enable usage of prebuilt ptx instead of source *.cl
+#define OCL_PREBUILD_BINARY_PATH "/data/local/tmp/ptx/"
+
 namespace cv { namespace ocl {
 
 #define MAX_PROG_CACHE_SIZE 1024
@@ -387,14 +394,45 @@ struct ProgramFileCache
         return true;
     }
 
+#ifdef OCL_PREBUILD_BINARY_PATH
+    void readOclBinary(const string& kernel, const string& options, std::vector<char>& data)
+    {
+        string full_file_name = kernel + " " + options + ".ptx";
+        for(string::iterator it=full_file_name.begin(); it!=full_file_name.end(); it++)
+        {
+            if (*it == ' ')
+                *it = '_';
+        }
+        full_file_name = string(OCL_PREBUILD_BINARY_PATH) + full_file_name;
+        printf("Reading ocl binary from %s\n", full_file_name.c_str());
+        std::ifstream in(full_file_name.c_str(), std::ios::in | std::ios::binary);
+        if (in)
+        {
+            in.seekg(0, std::ios::end);
+            data.resize(in.tellg());
+            in.seekg(0, std::ios::beg);
+            in.read(&data[0], data.size());
+            in.close();
+        }
+        else
+            data.clear();
+    }
+#endif
+
     cl_program getOrBuildProgram(const Context* ctx, const cv::ocl::ProgramEntry* source, const string& options)
     {
+#ifdef OCL_OPTION_LOG
+        FILE* f = fopen(OCL_OPTION_LOG, "at");
+        fprintf(f, "%s.cl %s\n", source->name, options.c_str());
+        fclose(f);
+#endif
+
         cl_int status = 0;
         cl_program program = NULL;
         std::vector<char> binary;
+#ifndef OCL_PREBUILD_BINARY_PATH
         if (!enable_disk_cache || !readConfigurationFromFile(options, binary))
         {
-            printf("clCreateProgramWithSource call\n");
             program = clCreateProgramWithSource(getClContext(ctx), 1, (const char**)&source->programStr, NULL, &status);
             openCLVerifyCall(status);
             cl_device_id device = getClDeviceID(ctx);
@@ -426,8 +464,10 @@ struct ProgramFileCache
             }
         }
         else
+#else
+        readOclBinary(string(source->name) + ".cl", options, binary);
+#endif
         {
-            printf("clCreateProgramWithBinary call\n");
             cl_device_id device = getClDeviceID(ctx);
             size_t size = binary.size();
             const char* ptr = &binary[0];

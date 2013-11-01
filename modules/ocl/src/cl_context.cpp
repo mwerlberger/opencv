@@ -292,13 +292,13 @@ static bool selectOpenCLDevice()
             if (isID || devices[i]->deviceName.find(deviceName) != std::string::npos)
             {
                 // check for OpenCL 1.1
-                if (devices[i]->deviceVersionMajor < 1 ||
-                        (devices[i]->deviceVersionMajor == 1 && devices[i]->deviceVersionMinor < 1))
-                {
-                    std::cerr << "Skip unsupported version of OpenCL device: " << devices[i]->deviceName
-                            << "(" << devices[i]->platform->platformName << ")" << std::endl;
-                    continue; // unsupported version of device, skip it
-                }
+//                 if (devices[i]->deviceVersionMajor < 1 ||
+//                         (devices[i]->deviceVersionMajor == 1 && devices[i]->deviceVersionMinor < 1))
+//                 {
+//                     std::cerr << "Skip unsupported version of OpenCL device: " << devices[i]->deviceName
+//                             << "(" << devices[i]->platform->platformName << ")" << std::endl;
+//                     continue; // unsupported version of device, skip it
+//                 }
                 try
                 {
                     setDevice(devices[i]);
