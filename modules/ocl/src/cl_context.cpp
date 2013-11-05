@@ -433,12 +433,12 @@ static int initializeOpenCLDevices()
                 openCLSafeCall(device.getInfo(CL_DEVICE_EXTENSIONS, &deviceInfo.info.deviceExtensions));
 
                 size_t fp64_khr = deviceInfo.info.deviceExtensions.find("cl_khr_fp64");
-                if(fp64_khr != std::string::npos)
-                {
-                    deviceInfo.info.compilationExtraOptions += "-D DOUBLE_SUPPORT";
-                    deviceInfo.info.haveDoubleSupport = true;
-                }
-                else
+//                 if(fp64_khr != std::string::npos)
+//                 {
+//                     deviceInfo.info.compilationExtraOptions += "-D DOUBLE_SUPPORT";
+//                     deviceInfo.info.haveDoubleSupport = true;
+//                 }
+//                 else
                 {
                     deviceInfo.info.haveDoubleSupport = false;
                 }

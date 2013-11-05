@@ -397,7 +397,11 @@ struct ProgramFileCache
 #ifdef OCL_PREBUILD_BINARY_PATH
     void readOclBinary(const string& kernel, const string& options, std::vector<char>& data)
     {
-        string full_file_name = kernel + " " + options + ".ptx";
+        string full_file_name;
+        if (options.empty())
+            full_file_name = kernel + ".ptx";
+        else
+            full_file_name = kernel + " " + options + ".ptx";
         for(string::iterator it=full_file_name.begin(); it!=full_file_name.end(); it++)
         {
             if (*it == ' ')
@@ -415,7 +419,10 @@ struct ProgramFileCache
             in.close();
         }
         else
+        {
+            printf("Cannot read kernel binary \"%s\"\n", full_file_name.c_str());
             data.clear();
+        }
     }
 #endif
 
@@ -471,6 +478,7 @@ struct ProgramFileCache
             cl_device_id device = getClDeviceID(ctx);
             size_t size = binary.size();
             const char* ptr = &binary[0];
+            printf("clCreateProgramWithBinary: %s, %d\n", (string(source->name) + ".cl").c_str(), size);
             program = clCreateProgramWithBinary(getClContext(ctx),
                     1, &device,
                     (const size_t *)&size, (const unsigned char **)&ptr,
