@@ -130,7 +130,7 @@ void cv::ocl::buildWarpCylindricalMaps(Size /*src_size*/, Rect dst_roi, const Ma
     args.push_back( make_pair( sizeof(cl_float), (void *)&scale));
 
     size_t globalThreads[3] = {map_x.cols, map_x.rows, 1};
-    size_t localThreads[3]  = {32, 4, 1};
+    size_t localThreads[3]  = {32, 1, 1};
     openCLExecuteKernel(clCxt, &build_warps, kernelName, globalThreads, localThreads, args, -1, -1);
 }
 

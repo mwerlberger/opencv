@@ -381,13 +381,13 @@ OCL_TEST_P(MedianFilter, Mat)
                                 CV_32FC1, CV_32FC3, CV_32FC4, \
                                 CV_64FC1, CV_64FC3, CV_64FC4)
 
-INSTANTIATE_TEST_CASE_P(Filter, Blur, Combine(
-                            FILTER_DATATYPES,
-                            Values(3, 5, 7),
-                            Values(Size(0, 0)), // not used
-                            FILTER_BORDER_SET_NO_WRAP_NO_ISOLATED,
-                            Values(0.0), // not used
-                            Bool()));
+// INSTANTIATE_TEST_CASE_P(Filter, Blur, Combine(
+//                             FILTER_DATATYPES,
+//                             Values(3, 5, 7),
+//                             Values(Size(0, 0)), // not used
+//                             FILTER_BORDER_SET_NO_WRAP_NO_ISOLATED,
+//                             Values(0.0), // not used
+//                             Bool()));
 
 INSTANTIATE_TEST_CASE_P(Filter, LaplacianTest, Combine(
                             FILTER_DATATYPES,

@@ -222,7 +222,7 @@ namespace cv
                 CV_Error(CV_StsBadArg, "Unsupported map types");
 
             int ocn = dst.oclchannels();
-            size_t localThreads[3] = { 16, 16, 1};
+            size_t localThreads[3] = { 16, 10, 1};
             size_t globalThreads[3] = { dst.cols, dst.rows, 1};
 
             Mat scalar(1, 1, CV_MAKE_TYPE(dst.depth(), ocn), borderValue);

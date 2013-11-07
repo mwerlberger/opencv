@@ -55,9 +55,6 @@ namespace ocl
 {
 void sortByKey(oclMat& keys, oclMat& vals, size_t vecSize, int method, bool isGreaterThan);
 
-//TODO(pengx17): change this value depending on device other than a constant
-const static unsigned int GROUP_SIZE = 256;
-
 const char * depth_strings[] =
 {
     "uchar",   //CV_8U
@@ -91,7 +88,6 @@ static void sortByKey(oclMat& keys, oclMat& vals, size_t vecSize, bool isGreater
 
     Context * cxt = Context::getContext();
     size_t globalThreads[3] = {vecSize / 2, 1, 1};
-    size_t localThreads[3]  = {GROUP_SIZE, 1, 1};
 
     // 2^numStages should be equal to vecSize or the output is invalid
     int numStages = 0;
@@ -115,7 +111,7 @@ static void sortByKey(oclMat& keys, oclMat& vals, size_t vecSize, bool isGreater
         for(int passOfStage = 0; passOfStage < stage + 1; ++passOfStage)
         {
             args[4] = std::make_pair(sizeof(cl_int), (void *)&passOfStage);
-            openCLExecuteKernel(cxt, &kernel_sort_by_key, kernelname, globalThreads, localThreads, args, -1, -1, build_opt_buf);
+            openCLExecuteKernel(cxt, &kernel_sort_by_key, kernelname, globalThreads, NULL, args, -1, -1, build_opt_buf);
         }
     }
 }
@@ -131,7 +127,6 @@ static void sortByKey(oclMat& keys, oclMat& vals, size_t vecSize, bool isGreater
     Context * cxt = Context::getContext();
 
     size_t globalThreads[3] = {vecSize, 1, 1};
-    size_t localThreads[3]  = {GROUP_SIZE, 1, 1};
 
     std::vector< std::pair<size_t, const void *> > args;
     char build_opt_buf [100];
@@ -139,18 +134,18 @@ static void sortByKey(oclMat& keys, oclMat& vals, size_t vecSize, bool isGreater
 
     //local
     String kernelname = "selectionSortLocal";
-    int lds_size = GROUP_SIZE * keys.elemSize();
+    int lds_size = cxt->getDeviceInfo().maxWorkGroupSize * keys.elemSize();
     args.push_back(std::make_pair(sizeof(cl_mem), (void *)&keys.data));
     args.push_back(std::make_pair(sizeof(cl_mem), (void *)&vals.data));
     args.push_back(std::make_pair(sizeof(cl_int), (void *)&vecSize));
     args.push_back(std::make_pair(lds_size,       (void*)NULL));
 
-    openCLExecuteKernel(cxt, &kernel_sort_by_key, kernelname, globalThreads, localThreads, args, -1, -1, build_opt_buf);
+    openCLExecuteKernel(cxt, &kernel_sort_by_key, kernelname, globalThreads, NULL, args, -1, -1, build_opt_buf);
 
     //final
     kernelname = "selectionSortFinal";
     args.pop_back();
-    openCLExecuteKernel(cxt, &kernel_sort_by_key, kernelname, globalThreads, localThreads, args, -1, -1, build_opt_buf);
+    openCLExecuteKernel(cxt, &kernel_sort_by_key, kernelname, globalThreads, NULL, args, -1, -1, build_opt_buf);
 }
 
 }  /* selection_sort */
@@ -340,6 +335,8 @@ static void sortByKey(oclMat& keys, oclMat& vals, size_t vecSize, bool isGreater
 {
     Context * cxt = Context::getContext();
 
+    const size_t GROUP_SIZE = cxt->getDeviceInfo().maxWorkGroupSize >= 256 ? 256: 128;
+    
     size_t globalThreads[3] = {vecSize, 1, 1};
     size_t localThreads[3]  = {GROUP_SIZE, 1, 1};
 
